@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MelonBookshelfApi", "MelonBookshelfApi\MelonBookshelfApi.csproj", "{34773B37-5B09-4C20-8E8B-A4B4F58DF5B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MelonBookchelfApi.Infrastructure", "MelonBookchelfApi.Infrastructure\MelonBookchelfApi.Infrastructure.csproj", "{462FF73B-5DDE-43D7-B8C8-80EC9C913D2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34773B37-5B09-4C20-8E8B-A4B4F58DF5B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34773B37-5B09-4C20-8E8B-A4B4F58DF5B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34773B37-5B09-4C20-8E8B-A4B4F58DF5B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34773B37-5B09-4C20-8E8B-A4B4F58DF5B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{462FF73B-5DDE-43D7-B8C8-80EC9C913D2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{462FF73B-5DDE-43D7-B8C8-80EC9C913D2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{462FF73B-5DDE-43D7-B8C8-80EC9C913D2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{462FF73B-5DDE-43D7-B8C8-80EC9C913D2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4410FA84-3213-4359-96AA-FE788D3890A8}
+	EndGlobalSection
+EndGlobal
