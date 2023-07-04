@@ -1,12 +1,10 @@
 using MelonBookchelfApi.Infrastructure.Data;
+using MelonBookshelfApi.ProgramExtentions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<BookshelfDbContext>(options =>
@@ -15,6 +13,11 @@ builder.Services.AddDbContext<BookshelfDbContext>(options =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<BookshelfDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -30,4 +33,22 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+try
+{
+    using var scope = app.Services.CreateScope();
+
+    app.Logger.LogInformation("Starting web host ({ApplicationName})...", appName);
+    app.Run();
+}
+catch (Exception ex)
+{
+    app.Logger.LogCritical(ex, "Host terminated unexpectedly ({ApplicationName})...", appName);
+
+    throw;
+}
+
+[ExcludeFromCodeCoverage]
+public partial class Program
+{
+    public const string appName = "MelonBookshelfApi";
+}

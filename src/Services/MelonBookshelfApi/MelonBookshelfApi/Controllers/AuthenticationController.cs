@@ -12,14 +12,14 @@ namespace MelonBookshelfApi.Controllers
     [ApiController]
     [Route("api")]
     [AllowAnonymous]
-    public class UserController : Controller
+    public class AuthenticationController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly ILogger<UserController> _logger;
+        private readonly ILogger<AuthenticationController> _logger;
         private readonly IConfiguration _configuration;
 
-        public UserController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<UserController> logger, IConfiguration configuration)
+        public AuthenticationController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<AuthenticationController> logger, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;

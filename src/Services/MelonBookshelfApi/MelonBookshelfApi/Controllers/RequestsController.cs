@@ -8,11 +8,11 @@ namespace MelonBookshelfApi.Controllers
     [Authorize]
     public class RequestsController : Controller
     {
-        [HttpPost]
-        [Route("requests/wishlist")]
-        public IActionResult AddWishlistResource(WishlistResourceRequest request)
-        {
-            return Ok();
-        }
+        //[HttpPost]
+        //[Route("requests/wishlist")]
+        //public IActionResult AddWishlistResource(WishlistResourceRequest request)
+        //{
+        //    return Ok();
+        //}
     }
 }
