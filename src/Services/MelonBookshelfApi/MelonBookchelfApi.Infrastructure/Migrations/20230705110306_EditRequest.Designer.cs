@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MelonBookchelfApi.Infrastructure.Migrations
 {
     [DbContext(typeof(BookshelfDbContext))]
-    [Migration("20230705084704_AddUpvoterTable")]
-    partial class AddUpvoterTable
+    [Migration("20230705110306_EditRequest")]
+    partial class EditRequest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,10 +33,26 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ConfirmationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Justification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -44,13 +60,16 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserID")
                         .IsRequired()
@@ -61,6 +80,21 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Requests");
+                });
+
+            modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestFollower", b =>
+                {
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("RequestId", "UserID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("RequestsFollowers");
                 });
 
             modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestUpvoter", b =>
@@ -107,8 +141,8 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("PurchasePrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<double>("PurchasePrice")
+                        .HasColumnType("float");
 
                     b.Property<string>("ResourceDetails")
                         .HasColumnType("nvarchar(max)");
@@ -355,6 +389,25 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("IdentityUser");
+                });
+
+            modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestFollower", b =>
+                {
+                    b.HasOne("MelonBookchelfApi.Infrastructure.Data.Models.Request", "Request")
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IdentityUser");
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestUpvoter", b =>

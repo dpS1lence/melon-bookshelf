@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MelonBookshelfApi.RequestModels;
+using MelonBookshelfApi.Services.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MelonBookshelfApi.Controllers
 {
@@ -8,11 +11,25 @@ namespace MelonBookshelfApi.Controllers
     [Authorize]
     public class RequestsController : Controller
     {
-        [HttpPost]
-        [Route("requests/wishlist")]
-        public IActionResult AddWishlistResource()
+        private readonly IRequestService _requestService;
+        private readonly ILogger _logger;
+
+        public RequestsController(IRequestService requestService, ILogger<RequestsController> logger)
         {
-            return Ok();
+            _requestService = requestService;
+            _logger = logger;
         }
+
+        [HttpPost]
+        [Route("api/requests")]
+        public async Task<IActionResult> AddRequest([FromBody] ResourceRequestDto requestDto)
+        {
+            var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _requestService.ProcessRequestAsync(requestDto, userId);
+
+            return Ok(result);
+        }
+
     }
 }

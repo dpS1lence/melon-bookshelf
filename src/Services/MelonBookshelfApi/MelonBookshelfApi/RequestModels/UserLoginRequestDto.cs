@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfApi.RequestModels
 {
-    public class UserLoginRequest
+    public class UserLoginRequestDto
     {
         public string Email { get; set; } = null!;
 

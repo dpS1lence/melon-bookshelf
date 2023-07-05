@@ -21,7 +21,7 @@ namespace MelonBookshelfApi.ResponceModels
 
         public DateTime DateAdded { get; set; }
 
-        public decimal PurchasePrice { get; set; }
+        public double PurchasePrice { get; set; }
 
         public string? InvoiceAttachment { get; set; }
 

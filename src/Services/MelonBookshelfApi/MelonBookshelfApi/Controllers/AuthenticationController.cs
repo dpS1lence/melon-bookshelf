@@ -16,7 +16,7 @@ namespace MelonBookshelfApi.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly ILogger<AuthenticationController> _logger;
+        private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
 
         public AuthenticationController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<AuthenticationController> logger, IConfiguration configuration)
@@ -29,7 +29,7 @@ namespace MelonBookshelfApi.Controllers
 
         [HttpPost]
         [Route("users/register")]
-        public async Task<IActionResult> Register(UserRegistrationRequest request)
+        public async Task<IActionResult> Register(UserRegistrationRequestDto request)
         {
             _logger.LogInformation("User Registration request received.");
 
@@ -49,7 +49,7 @@ namespace MelonBookshelfApi.Controllers
 
         [HttpPost]
         [Route("users/login")]
-        public async Task<IActionResult> Login(UserLoginRequest request)
+        public async Task<IActionResult> Login(UserLoginRequestDto request)
         {
             _logger.LogInformation("User Login request received.");
 

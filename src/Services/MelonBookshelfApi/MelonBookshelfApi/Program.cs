@@ -2,6 +2,7 @@ using MelonBookchelfApi.Infrastructure.Data;
 using MelonBookchelfApi.Infrastructure.Repositories;
 using MelonBookshelfApi.ProgramExtentions;
 using MelonBookshelfApi.Services;
+using MelonBookshelfApi.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.Design;
@@ -23,8 +24,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddScoped<IResourceService, ResourceService>();
-builder.Services.AddScoped<IRepository, Repository>();
+//builder.Services.AddScoped<IResourceService, ResourceService>();
+//builder.Services.AddScoped<IRepository, Repository>();
+//builder.Services.AddScoped<IRequestService, RequestService>();
 
 var app = builder.Build();
 

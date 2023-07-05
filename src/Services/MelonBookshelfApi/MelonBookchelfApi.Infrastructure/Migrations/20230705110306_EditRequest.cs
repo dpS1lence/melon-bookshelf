@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MelonBookchelfApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class EditRequest : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -177,10 +177,15 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ConfirmationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Author = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Priority = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Justification = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Justification = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,7 +212,7 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                     Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PurchasePrice = table.Column<double>(type: "float", nullable: false),
                     InvoiceAttachment = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ResourceDetails = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -220,6 +225,54 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         principalTable: "ResourceCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RequestsFollowers",
+                columns: table => new
+                {
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RequestId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RequestsFollowers", x => new { x.RequestId, x.UserID });
+                    table.ForeignKey(
+                        name: "FK_RequestsFollowers_AspNetUsers_UserID",
+                        column: x => x.UserID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_RequestsFollowers_Requests_RequestId",
+                        column: x => x.RequestId,
+                        principalTable: "Requests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RequestsUpvoters",
+                columns: table => new
+                {
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RequestId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RequestsUpvoters", x => new { x.RequestId, x.UserID });
+                    table.ForeignKey(
+                        name: "FK_RequestsUpvoters_AspNetUsers_UserID",
+                        column: x => x.UserID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_RequestsUpvoters_Requests_RequestId",
+                        column: x => x.RequestId,
+                        principalTable: "Requests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(
@@ -267,6 +320,16 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RequestsFollowers_UserID",
+                table: "RequestsFollowers",
+                column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RequestsUpvoters_UserID",
+                table: "RequestsUpvoters",
+                column: "UserID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Resources_CategoryID",
                 table: "Resources",
                 column: "CategoryID");
@@ -291,7 +354,10 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Requests");
+                name: "RequestsFollowers");
+
+            migrationBuilder.DropTable(
+                name: "RequestsUpvoters");
 
             migrationBuilder.DropTable(
                 name: "Resources");
@@ -300,10 +366,13 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Requests");
 
             migrationBuilder.DropTable(
                 name: "ResourceCategories");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

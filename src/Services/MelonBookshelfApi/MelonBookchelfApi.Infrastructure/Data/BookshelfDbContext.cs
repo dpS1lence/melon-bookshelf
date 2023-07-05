@@ -37,10 +37,6 @@ namespace MelonBookchelfApi.Infrastructure.Data
                 a.UserID
             });
 
-            builder.Entity<Resource>()
-                .Property(r => r.PurchasePrice)
-                .HasColumnType("decimal(18,2)");
-
             base.OnModelCreating(builder);
         }
     }
