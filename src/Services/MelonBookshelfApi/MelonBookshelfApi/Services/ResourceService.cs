@@ -12,7 +12,7 @@ namespace MelonBookshelfApi.Services
         private readonly IRepository _repository;
         private readonly ILogger _logger;
 
-        public ResourceService(IRepository repository, ILogger logger)
+        public ResourceService(IRepository repository, ILogger<ResourceService> logger)
         {
             _repository = repository;
             _logger = logger;

@@ -33,12 +33,11 @@ namespace MelonBookshelfApi.Controllers
         {
             _logger.LogInformation("User Registration request received.");
 
-            var user = new IdentityUser { UserName = request.Email, Email = request.Email };
+            var user = new IdentityUser { UserName = request.FirstName + request.LastName, Email = request.Email };
             var result = await _userManager.CreateAsync(user, request.Password);
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
                 _logger.LogInformation("User registered successfully.");
                 return Ok();
             }
@@ -53,47 +52,56 @@ namespace MelonBookshelfApi.Controllers
         {
             _logger.LogInformation("User Login request received.");
 
-            var result = await _signInManager.PasswordSignInAsync(request.Email, request.Password, isPersistent: false, lockoutOnFailure: false);
+            var user = await _userManager.FindByEmailAsync(request.Email);
 
-            if (result.Succeeded)
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userManager.CheckPasswordAsync(user, request.Password);
+
+            if (result)
             {
                 _logger.LogInformation("User login successful. Generating JWT token.");
 
-                string token = GenerateToken(request.Email);
+                string token = GenerateToken(user);
 
                 _logger.LogInformation("JWT token generated successfully.");
                 return Ok(new { Token = token });
             }
+            else
+            {
+                _logger.LogError("User login failed.");
 
-            _logger.LogError("User login failed.");
-            return Unauthorized();
+                return BadRequest("User login failed.");
+            }
         }
 
-        private string GenerateToken(string email)
+        private string GenerateToken(IdentityUser user)
         {
             var secretKey = _configuration["JwtSettings:SecretKey"];
-            var issuer = _configuration["JwtSettings:Issuer"];
-            var audience = _configuration["JwtSettings:Audience"];
-
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? throw new ArgumentException("Invalid Secret Key")));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(120),
-                signingCredentials: credentials
-            );
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            return tokenHandler.WriteToken(token);
+            var key = Encoding.ASCII.GetBytes(secretKey);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Name, user.Email)
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var encryptedToken = tokenHandler.WriteToken(token);
+
+            return encryptedToken;
         }
     }
 }

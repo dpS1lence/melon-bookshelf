@@ -21,7 +21,7 @@ namespace MelonBookshelfApi.Controllers
         }
 
         [HttpPost]
-        [Route("api/requests")]
+        [Route("requests")]
         public async Task<IActionResult> AddRequest([FromBody] ResourceRequestDto requestDto)
         {
             var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;

@@ -1,11 +1,12 @@
 using MelonBookchelfApi.Infrastructure.Data;
 using MelonBookchelfApi.Infrastructure.Repositories;
+using MelonBookshelfApi.ApplicationExtentions;
 using MelonBookshelfApi.ProgramExtentions;
 using MelonBookshelfApi.Services;
 using MelonBookshelfApi.Services.Contracts;
+using MelonBookshelfApi.Swagger;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
 using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
@@ -16,24 +17,39 @@ builder.Services.AddDbContext<BookshelfDbContext>(options =>
     options.UseSqlServer(connectionString)
 );
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddScoped<DbContext, BookshelfDbContext>();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+    {
+        options.Password.RequiredLength = 6;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+    })
     .AddEntityFrameworkStores<BookshelfDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddJwtAuthentication(builder.Configuration);
-//builder.Services.AddScoped<IResourceService, ResourceService>();
-//builder.Services.AddScoped<IRepository, Repository>();
-//builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddLogging();
+builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddScoped<IRequestService, RequestService>();
+
+var swaggerSettings = builder.Configuration.GetSection("Swagger").Get<SwaggerSettings>();
+
+builder.Services.AddSwagger(p =>
+{
+    p.LoadSettingsFrom(swaggerSettings!);
+});
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(swaggerSettings);
 }
 
 app.UseHttpsRedirection();
