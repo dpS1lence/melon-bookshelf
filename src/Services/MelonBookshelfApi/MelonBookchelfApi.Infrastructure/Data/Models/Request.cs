@@ -11,11 +11,8 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
 {
     public class Request : Model
     {
-        [ForeignKey(nameof(Resource))]
-        public int ResourceID { get; set; }
-
         [ForeignKey(nameof(IdentityUser))]
-        public string UserID { get; set; }
+        public string UserID { get; set; } = null!;
 
         public DateTime ConfirmationDate { get; set; }
 
@@ -30,8 +27,6 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
 
         [Required]
         public string Reason { get; set; } = null!;
-
-        public Resource Resource { get; set; } = null!;
 
         public IdentityUser IdentityUser { get; set; } = null!;
     }

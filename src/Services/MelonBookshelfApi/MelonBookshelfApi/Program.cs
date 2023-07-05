@@ -1,14 +1,19 @@
 using MelonBookchelfApi.Infrastructure.Data;
+using MelonBookchelfApi.Infrastructure.Repositories;
 using MelonBookshelfApi.ProgramExtentions;
+using MelonBookshelfApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
+using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DockerConnection");
 builder.Services.AddDbContext<BookshelfDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString)
+);
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<BookshelfDbContext>()
@@ -18,6 +23,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddScoped<IRepository, Repository>();
 
 var app = builder.Build();
 

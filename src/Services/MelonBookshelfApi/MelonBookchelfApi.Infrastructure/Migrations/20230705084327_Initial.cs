@@ -170,6 +170,30 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Requests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ConfirmationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Priority = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Justification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Requests_AspNetUsers_UserID",
+                        column: x => x.UserID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Resources",
                 columns: table => new
                 {
@@ -185,82 +209,15 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     InvoiceAttachment = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ResourceDetails = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ResourceCategoryId = table.Column<int>(type: "int", nullable: false)
+                    ResourceDetails = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Resources", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Resources_ResourceCategories_ResourceCategoryId",
-                        column: x => x.ResourceCategoryId,
+                        name: "FK_Resources_ResourceCategories_CategoryID",
+                        column: x => x.CategoryID,
                         principalTable: "ResourceCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Requests",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RequestID = table.Column<int>(type: "int", nullable: false),
-                    ResourceID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    ConfirmationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Priority = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Justification = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Requests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Requests_Resources_ResourceID",
-                        column: x => x.ResourceID,
-                        principalTable: "Resources",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RequestsFollowers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    ResourceID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RequestsFollowers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RequestsFollowers_Resources_ResourceID",
-                        column: x => x.ResourceID,
-                        principalTable: "Resources",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RequestsUpvoters",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    ResourceID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RequestsUpvoters", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RequestsUpvoters_Resources_ResourceID",
-                        column: x => x.ResourceID,
-                        principalTable: "Resources",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -305,24 +262,14 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Requests_ResourceID",
+                name: "IX_Requests_UserID",
                 table: "Requests",
-                column: "ResourceID");
+                column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RequestsFollowers_ResourceID",
-                table: "RequestsFollowers",
-                column: "ResourceID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RequestsUpvoters_ResourceID",
-                table: "RequestsUpvoters",
-                column: "ResourceID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Resources_ResourceCategoryId",
+                name: "IX_Resources_CategoryID",
                 table: "Resources",
-                column: "ResourceCategoryId");
+                column: "CategoryID");
         }
 
         /// <inheritdoc />
@@ -347,19 +294,13 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                 name: "Requests");
 
             migrationBuilder.DropTable(
-                name: "RequestsFollowers");
-
-            migrationBuilder.DropTable(
-                name: "RequestsUpvoters");
+                name: "Resources");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Resources");
 
             migrationBuilder.DropTable(
                 name: "ResourceCategories");

@@ -21,8 +21,4 @@
     <ProjectReference Include="..\MelonBookchelfApi.Infrastructure\MelonBookchelfApi.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ResponceModels\" />
-  </ItemGroup>
-
 </Project>

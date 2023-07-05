@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MelonBookchelfApi.Infrastructure.Migrations
 {
     [DbContext(typeof(BookshelfDbContext))]
-    [Migration("20230704140454_AddRelations")]
-    partial class AddRelations
+    [Migration("20230705084327_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,9 +48,6 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ResourceID")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -61,41 +58,9 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResourceID");
-
                     b.HasIndex("UserID");
 
                     b.ToTable("Requests");
-                });
-
-            modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestFollower", b =>
-                {
-                    b.Property<int>("ResourceID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("ResourceID", "UserID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("RequestsFollowers");
-                });
-
-            modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestUpvoter", b =>
-                {
-                    b.Property<int>("ResourceID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("ResourceID", "UserID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("RequestsUpvoters");
                 });
 
             modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.Resource", b =>
@@ -368,12 +333,6 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
 
             modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.Request", b =>
                 {
-                    b.HasOne("MelonBookchelfApi.Infrastructure.Data.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
                         .WithMany()
                         .HasForeignKey("UserID")
@@ -381,46 +340,6 @@ namespace MelonBookchelfApi.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("IdentityUser");
-
-                    b.Navigation("Resource");
-                });
-
-            modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestFollower", b =>
-                {
-                    b.HasOne("MelonBookchelfApi.Infrastructure.Data.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("IdentityUser");
-
-                    b.Navigation("Resource");
-                });
-
-            modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.RequestUpvoter", b =>
-                {
-                    b.HasOne("MelonBookchelfApi.Infrastructure.Data.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("IdentityUser");
-
-                    b.Navigation("Resource");
                 });
 
             modelBuilder.Entity("MelonBookchelfApi.Infrastructure.Data.Models.Resource", b =>

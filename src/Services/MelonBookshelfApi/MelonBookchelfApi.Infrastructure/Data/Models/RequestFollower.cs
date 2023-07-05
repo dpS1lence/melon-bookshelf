@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MelonBookchelfApi.Infrastructure.Data.Models
 {
@@ -13,11 +9,11 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
         [ForeignKey(nameof(IdentityUser))]
         public string UserID { get; set; } = null!;
 
-        [ForeignKey(nameof(Resource))]
-        public int ResourceID { get; set; }
+        [ForeignKey(nameof(Request))]
+        public int RequestId { get; set; }
 
         public IdentityUser IdentityUser { get; set; } = null!;
 
-        public Resource Resource { get; set; } = null!;
+        public Request Request { get; set; } = null!;
     }
 }

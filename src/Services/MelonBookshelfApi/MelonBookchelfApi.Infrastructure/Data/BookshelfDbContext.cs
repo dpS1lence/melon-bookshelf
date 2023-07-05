@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MelonBookchelfApi.Infrastructure.Data.Models;
+using System.Reflection.Emit;
 
 namespace MelonBookchelfApi.Infrastructure.Data
 {
@@ -26,15 +27,19 @@ namespace MelonBookchelfApi.Infrastructure.Data
         {
             builder.Entity<RequestFollower>().HasKey(a => new
             {
-                a.ResourceID,
+                a.RequestId,
+                a.UserID
+            });
+            
+            builder.Entity<RequestUpvoter>().HasKey(a => new
+            {
+                a.RequestId,
                 a.UserID
             });
 
-            builder.Entity<RequestUpvoter>().HasKey(a => new
-            {
-                a.ResourceID,
-                a.UserID
-            });
+            builder.Entity<Resource>()
+                .Property(r => r.PurchasePrice)
+                .HasColumnType("decimal(18,2)");
 
             base.OnModelCreating(builder);
         }
