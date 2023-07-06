@@ -5,7 +5,7 @@ using MelonBookchelfApi.Infrastructure.Data.Models.Enums;
 
 namespace MelonBookshelfApi.ResponceModels
 {
-    public class SearchResult
+    public class ResourceModel
     {
         public ResourceType Type { get; set; }
 
@@ -15,7 +15,7 @@ namespace MelonBookshelfApi.ResponceModels
 
         public string Description { get; set; } = null!;
 
-        public string Link { get; set; } = null!;
+        public string? Link { get; set; }
 
         public string Status { get; set; } = null!;
 
@@ -27,6 +27,6 @@ namespace MelonBookshelfApi.ResponceModels
 
         public string? ResourceDetails { get; set; }
 
-        public ResourceCategory ResourceCategory { get; set; } = null!;
+        public string ResourceCategory { get; set; } = null!;
     }
 }

@@ -25,6 +25,13 @@ namespace MelonBookshelfApi.Services
             _userManager = userManager;
         }
 
+        public IEnumerable<ResourceModel> GetAllResources()
+        {
+            var resources = _repository.All<Resource>();
+
+            return _mapper.Map<IEnumerable<ResourceModel>>(resources);
+        }
+
         public IEnumerable<string> GetCategoriesAsync()
         {
             var categories = _repository.All<ResourceCategory>().Select(a => a.Name).AsEnumerable();
@@ -62,7 +69,7 @@ namespace MelonBookshelfApi.Services
             return map;
         }
 
-        public async Task<IEnumerable<SearchResult>> SearchResources(string? type, string? category, string? title)
+        public async Task<IEnumerable<ResourceModel>> SearchResources(string? type, string? category, string? title)
         {
             var allResources = _repository
                 .All<Resource>()
@@ -82,13 +89,13 @@ namespace MelonBookshelfApi.Services
                 allResources = allResources.Where(r => r.Title == title);
             }
 
-            var serachResultCollection = new List<SearchResult>();
+            var serachResultCollection = new List<ResourceModel>();
 
             foreach (var item in allResources)
             {
                 var itemCategory = await _repository.GetByIdAsync<ResourceCategory>(item.CategoryID);
 
-                serachResultCollection.Add(new SearchResult
+                serachResultCollection.Add(new ResourceModel
                 {
                     Type = item.Type,
                     Title = item.Title,
@@ -100,7 +107,7 @@ namespace MelonBookshelfApi.Services
                     PurchasePrice = item.PurchasePrice,
                     InvoiceAttachment = item.InvoiceAttachment,
                     ResourceDetails = item.ResourceDetails,
-                    ResourceCategory = itemCategory
+                    ResourceCategory = itemCategory.Name
                 });
             }
 

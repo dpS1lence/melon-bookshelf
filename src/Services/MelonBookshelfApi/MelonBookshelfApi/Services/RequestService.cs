@@ -2,8 +2,10 @@
 using MelonBookchelfApi.Infrastructure.Data.Models;
 using MelonBookchelfApi.Infrastructure.Data.Models.Enums;
 using MelonBookchelfApi.Infrastructure.Repositories;
+using MelonBookshelfApi.CustomObjects;
 using MelonBookshelfApi.CustomObjects.Enums;
-using MelonBookshelfApi.RequestModels;
+using MelonBookshelfApi.RequestDtos;
+using MelonBookshelfApi.ResponceModels;
 using MelonBookshelfApi.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +28,14 @@ namespace MelonBookshelfApi.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ResourceRequestDto>> GetRequestsByUserId(string userId)
+        public async Task<ResourceRequestDto> GetRequestById(int requestId)
+        {
+            var request = await _repository.GetByIdAsync<Request>(requestId);
+
+            return _mapper.Map<ResourceRequestDto>(request);
+        }
+
+        public async Task<IEnumerable<UserRequestedResourceModel>> GetRequestsByUserId(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -37,28 +46,70 @@ namespace MelonBookshelfApi.Services
 
             var requests = _repository.All<Request>().Where(a => a.UserID == userId);
 
-            var map = _mapper.Map<IEnumerable<ResourceRequestDto>>(requests);
+            var model = new List<UserRequestedResourceModel>();
+            foreach (var item in requests)
+            {
+                var followersCollection = _repository
+                    .All<RequestFollower>()
+                    .Where(a => a.RequestId == item.Id)
+                    .Include(a => a.IdentityUser)
+                    .Select(a => new User { Id = a.IdentityUser.Id, Name = a.IdentityUser.UserName })
+                    .AsEnumerable();
 
-            return map;
+                var upvotersCollection = _repository
+                    .All<RequestFollower>()
+                    .Where(a => a.RequestId == item.Id)
+                    .Include(a => a.IdentityUser)
+                    .Select(a => new User { Id = a.IdentityUser.Id, Name = a.IdentityUser.UserName })
+                    .AsEnumerable();
+
+                model.Add(new UserRequestedResourceModel
+                {
+                    Author = item.Author,
+                    Category = item.Category,
+                    Priority = item.Priority,
+                    Status = item.Status,
+                    Title = item.Title,
+                    FollowersCollection = followersCollection,
+                    FollowersCount = followersCollection.Count(),
+                    UpvotersCollection = upvotersCollection,
+                    UpvotersCount = upvotersCollection.Count()
+                });
+            }
+
+            return model;
         }
 
         public async Task<ProcessRequestResult> ProcessRequestAsync(ResourceRequestDto requestDto, string userId)
         {
-            // Check if the title or author already exist or have been requested
-            //bool titleExists = await _requestRepository.DoesTitleExistAsync(requestDto.Title);
-            //bool authorExists = await _requestRepository.DoesAuthorExistAsync(requestDto.Author);
+            var contentAvalability = await IsContentAvalable(requestDto.Title, requestDto.Author);
 
-            //if (titleExists || authorExists)
-            //{
-            //    // Handle the case where title or author already exist or have been requested
-            //    // You can return an appropriate response or provide support for the existing request
-            //}
+            switch (contentAvalability.ProcessRequest)
+            {
+                case ProcessRequest.ContentDoesNotExist:
+                    break;
+                case ProcessRequest.ContentRequestInProgress:
+                    if(contentAvalability.RequestId == null)
+                    {
+                        throw new ArgumentException(ProcessRequest.UnableToProcessRequest.ToString());
+                    }
+
+                    int id = contentAvalability.RequestId.Value;
+
+                    return new ProcessRequestResult 
+                    { 
+                        ProcessRequest = ProcessRequest.ContentRequestInProgress, 
+                        RequestId = id
+                    };
+                case ProcessRequest.ContentAlreadyExists:
+                    return new ProcessRequestResult { ProcessRequest = ProcessRequest.ContentAlreadyExists };
+            }
 
             var user = await _userManager.FindByIdAsync(userId);
 
             if(user == null)
             {
-                return ProcessRequestResult.UnableToProcessRequest;
+                return new ProcessRequestResult { ProcessRequest = ProcessRequest.UnableToProcessRequest };
             }
 
             var resourceRequest = new Request
@@ -84,7 +135,32 @@ namespace MelonBookshelfApi.Services
             //SendConfirmationEmailToUser(resourceRequest);
             //SendConfirmationEmailToAdmin(resourceRequest);
 
-            return ProcessRequestResult.RequestProcessedSuccessfuly;
+            return new ProcessRequestResult { ProcessRequest = ProcessRequest.RequestProcessedSuccessfuly };
+        }
+
+        private async Task<ProcessRequestResult> IsContentAvalable(string title, string author)
+        {
+            var isAvalableInResources = await _repository
+                .All<Resource>()
+                .Where(a => a.Author.ToLower().Contains(author.ToLower()) && a.Title.ToLower().Contains(title.ToLower()))
+                .FirstOrDefaultAsync();
+
+            if(isAvalableInResources == null)
+            {
+                var isAvalableInRequests = await _repository
+                .All<Request>()
+                .Where(a => a.Author.ToLower().Contains(author.ToLower()) && a.Title.ToLower().Contains(title.ToLower()))
+                .FirstOrDefaultAsync();
+
+                if(isAvalableInRequests == null)
+                {
+                    return new ProcessRequestResult { ProcessRequest = ProcessRequest.ContentDoesNotExist};
+                }
+
+                return new ProcessRequestResult { ProcessRequest = ProcessRequest.ContentRequestInProgress, RequestId = isAvalableInRequests.Id };
+            }
+
+            return new ProcessRequestResult { ProcessRequest = ProcessRequest.ContentAlreadyExists };
         }
     }
 }

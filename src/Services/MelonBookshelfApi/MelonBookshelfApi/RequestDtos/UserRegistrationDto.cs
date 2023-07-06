@@ -1,6 +1,6 @@
-﻿namespace MelonBookshelfApi.RequestModels
+﻿namespace MelonBookshelfApi.RequestDtos
 {
-    public class UserRegistrationRequestDto
+    public class UserRegistrationDto
     {
         public string FirstName { get; set; } = null!;
 

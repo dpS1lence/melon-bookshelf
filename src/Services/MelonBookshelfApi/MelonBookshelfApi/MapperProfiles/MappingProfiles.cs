@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MelonBookchelfApi.Infrastructure.Data.Models;
-using MelonBookshelfApi.RequestModels;
+using MelonBookshelfApi.RequestDtos;
 using MelonBookshelfApi.ResponceModels;
 
 namespace MelonBookshelfApi.MapperProfiles
@@ -12,6 +12,7 @@ namespace MelonBookshelfApi.MapperProfiles
             CreateMap<Resource, PhysicalResource>().ReverseMap();
             CreateMap<Resource, PhysicalResourceTaken>().ReverseMap();
             CreateMap<Request, ResourceRequestDto>().ReverseMap();
+            CreateMap<Resource, ResourceModel>().ReverseMap();
         }
     }
 }

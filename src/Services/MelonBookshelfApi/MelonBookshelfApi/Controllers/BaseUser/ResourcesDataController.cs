@@ -1,29 +1,38 @@
-﻿using MelonBookshelfApi.RequestModels;
+﻿using MelonBookshelfApi.RequestDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.Design;
 using System.Security.Claims;
 using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
-namespace MelonBookshelfApi.Controllers
+namespace MelonBookshelfApi.Controllers.BaseUser
 {
     [ApiController]
     [Route("api")]
     [Authorize]
-    public class ResourcesController : Controller
+    public class ResourcesDataController : Controller
     {
         private readonly IResourceService _resourceService;
         private readonly ILogger _logger;
 
-        public ResourcesController(IResourceService resourceService, ILogger<ResourcesController> logger)
+        public ResourcesDataController(IResourceService resourceService, ILogger<ResourcesDataController> logger)
         {
             _resourceService = resourceService;
             _logger = logger;
         }
 
         [HttpGet]
+        [Route("resources")]
+        public IActionResult Resources()
+        {
+            var resources = _resourceService.GetAllResources();
+
+            return Ok(resources);
+        }
+
+        [HttpGet]
         [Route("resources/search")]
-        public async Task<IActionResult> SearchResources([FromBody] SearchResourcesRequestDto dto)
+        public async Task<IActionResult> SearchResources([FromBody] SearchResourcesDto dto)
         {
             var resources = await _resourceService.SearchResources(dto.Type, dto.Category, dto.Title);
 
@@ -33,7 +42,7 @@ namespace MelonBookshelfApi.Controllers
                 filteredResources = filteredResources.Where(r => r.Type.ToString().Equals(dto.Type, StringComparison.OrdinalIgnoreCase)).ToList();
 
             if (!string.IsNullOrEmpty(dto.Category))
-                filteredResources = filteredResources.Where(r => r.ResourceCategory.Name.Equals(dto.Category, StringComparison.OrdinalIgnoreCase)).ToList();
+                filteredResources = filteredResources.Where(r => r.ResourceCategory.Equals(dto.Category, StringComparison.OrdinalIgnoreCase)).ToList();
 
             if (!string.IsNullOrEmpty(dto.Title))
                 filteredResources = filteredResources.Where(r => r.Title.Contains(dto.Title, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -43,7 +52,7 @@ namespace MelonBookshelfApi.Controllers
 
         [HttpGet]
         [Route("resources/categories")]
-        public IActionResult GetCategories()
+        public IActionResult GetResourcesCategories()
         {
             var categories = _resourceService.GetCategoriesAsync();
 
@@ -51,7 +60,7 @@ namespace MelonBookshelfApi.Controllers
         }
 
         [HttpGet]
-        [Route("resources/{physical-resource-id}/physical")]
+        [Route("resources/{physical-resource-id}")]
         public async Task<IActionResult> PhysicalResourceById([FromBody] string pysicalResourceId)
         {
             var physicalResource = await _resourceService.GetPhysicalResourceByIdAsync(pysicalResourceId);

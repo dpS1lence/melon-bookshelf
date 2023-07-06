@@ -1,11 +1,8 @@
-﻿using MelonBookshelfApi.RequestModels;
+﻿using MelonBookshelfApi.RequestDtos;
+using MelonBookshelfApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace MelonBookshelfApi.Controllers
 {
@@ -15,21 +12,19 @@ namespace MelonBookshelfApi.Controllers
     public class AuthenticationController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
 
-        public AuthenticationController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<AuthenticationController> logger, IConfiguration configuration)
+        public AuthenticationController(UserManager<IdentityUser> userManager, ILogger<AuthenticationController> logger, IConfiguration configuration)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _logger = logger;
             _configuration = configuration;
         }
 
         [HttpPost]
         [Route("users/register")]
-        public async Task<IActionResult> Register(UserRegistrationRequestDto request)
+        public async Task<IActionResult> Register(UserRegistrationDto request)
         {
             _logger.LogInformation("User Registration request received.");
 
@@ -48,7 +43,7 @@ namespace MelonBookshelfApi.Controllers
 
         [HttpPost]
         [Route("users/login")]
-        public async Task<IActionResult> Login(UserLoginRequestDto request)
+        public async Task<IActionResult> Login(UserLoginDto request)
         {
             _logger.LogInformation("User Login request received.");
 
@@ -65,7 +60,7 @@ namespace MelonBookshelfApi.Controllers
             {
                 _logger.LogInformation("User login successful. Generating JWT token.");
 
-                string token = GenerateToken(user);
+                string token = JwtTokenGenerator.GenerateToken(_configuration, user);
 
                 _logger.LogInformation("JWT token generated successfully.");
                 return Ok(new { Token = token });
@@ -76,32 +71,6 @@ namespace MelonBookshelfApi.Controllers
 
                 return BadRequest("User login failed.");
             }
-        }
-
-        private string GenerateToken(IdentityUser user)
-        {
-            var secretKey = _configuration["JwtSettings:SecretKey"];
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(secretKey);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user.Email)
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var encryptedToken = tokenHandler.WriteToken(token);
-
-            return encryptedToken;
         }
     }
 }

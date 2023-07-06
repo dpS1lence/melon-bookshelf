@@ -1,6 +1,6 @@
 ﻿using MelonBookchelfApi.Infrastructure.Data.Models.Enums;
 
-namespace MelonBookshelfApi.RequestModels
+namespace MelonBookshelfApi.RequestDtos
 {
     public class ResourceRequestDto
     {

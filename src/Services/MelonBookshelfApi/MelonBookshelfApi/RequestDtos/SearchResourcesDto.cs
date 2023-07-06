@@ -1,6 +1,6 @@
-﻿namespace MelonBookshelfApi.RequestModels
+﻿namespace MelonBookshelfApi.RequestDtos
 {
-    public class SearchResourcesRequestDto
+    public class SearchResourcesDto
     {
         public string? Type { get; set; }
         public string? Category { get; set; }
