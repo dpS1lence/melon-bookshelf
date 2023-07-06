@@ -1,6 +1,7 @@
 using MelonBookchelfApi.Infrastructure.Data;
 using MelonBookchelfApi.Infrastructure.Repositories;
 using MelonBookshelfApi.ApplicationExtentions;
+using MelonBookshelfApi.MapperProfiles;
 using MelonBookshelfApi.ProgramExtentions;
 using MelonBookshelfApi.Services;
 using MelonBookshelfApi.Services.Contracts;
@@ -37,6 +38,10 @@ builder.Services.AddLogging();
 builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<MappingProfiles>();
+});
 
 var swaggerSettings = builder.Configuration.GetSection("Swagger").Get<SwaggerSettings>();
 
@@ -53,6 +58,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
