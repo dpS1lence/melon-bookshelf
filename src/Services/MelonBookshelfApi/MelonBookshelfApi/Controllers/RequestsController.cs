@@ -21,7 +21,7 @@ namespace MelonBookshelfApi.Controllers
         }
 
         [HttpPost]
-        [Route("requests")]
+        [Route("request")]
         public async Task<IActionResult> AddRequest([FromBody] ResourceRequestDto requestDto)
         {
             var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -31,5 +31,15 @@ namespace MelonBookshelfApi.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("requests")]
+        public async Task<IActionResult> GetRequestsByUserId()
+        {
+            var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await _requestService.GetRequestsByUserId(userId);
+
+            return Ok(result);
+        }
     }
 }

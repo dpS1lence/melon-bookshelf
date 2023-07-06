@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.Design;
+using System.Security.Claims;
 using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
 namespace MelonBookshelfApi.Controllers
@@ -38,6 +39,35 @@ namespace MelonBookshelfApi.Controllers
                 filteredResources = filteredResources.Where(r => r.Title.Contains(dto.Title, StringComparison.OrdinalIgnoreCase)).ToList();
 
             return Ok(filteredResources);
+        }
+
+        [HttpGet]
+        [Route("resources/categories")]
+        public IActionResult GetCategories()
+        {
+            var categories = _resourceService.GetCategoriesAsync();
+
+            return Ok(categories);
+        }
+
+        [HttpGet]
+        [Route("resources/{physical-resource-id}/physical")]
+        public async Task<IActionResult> PhysicalResourceById([FromBody] string pysicalResourceId)
+        {
+            var physicalResource = await _resourceService.GetPhysicalResourceByIdAsync(pysicalResourceId);
+
+            return Ok(physicalResource);
+        }
+
+        [HttpGet]
+        [Route("resources/taken")]
+        public async Task<IActionResult> PhysicalResourcesByUserId()
+        {
+            var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            var physicalResources = await _resourceService.GetPhysicalResourcesByUserIdAsync(userId);
+
+            return Ok(physicalResources);
         }
     }
 }

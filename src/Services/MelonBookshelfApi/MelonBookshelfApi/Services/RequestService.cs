@@ -1,4 +1,5 @@
-﻿using MelonBookchelfApi.Infrastructure.Data.Models;
+﻿using AutoMapper;
+using MelonBookchelfApi.Infrastructure.Data.Models;
 using MelonBookchelfApi.Infrastructure.Data.Models.Enums;
 using MelonBookchelfApi.Infrastructure.Repositories;
 using MelonBookshelfApi.CustomObjects.Enums;
@@ -15,11 +16,30 @@ namespace MelonBookshelfApi.Services
         private readonly IRepository _repository;
         private readonly ILogger _logger;
         private readonly UserManager<IdentityUser> _userManager;
-        public RequestService(IRepository repository, ILogger<RequestService> logger, UserManager<IdentityUser> userManager)
+        private readonly IMapper _mapper;
+
+        public RequestService(IRepository repository, ILogger<RequestService> logger, UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
             _userManager = userManager;
+            _mapper = mapper;
+        }
+
+        public async Task<IEnumerable<ResourceRequestDto>> GetRequestsByUserId(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new ArgumentException("Invalid User");
+            }
+
+            var requests = _repository.All<Request>().Where(a => a.UserID == userId);
+
+            var map = _mapper.Map<IEnumerable<ResourceRequestDto>>(requests);
+
+            return map;
         }
 
         public async Task<ProcessRequestResult> ProcessRequestAsync(ResourceRequestDto requestDto, string userId)
@@ -51,7 +71,6 @@ namespace MelonBookshelfApi.Services
                 Priority = requestDto.Priority,
                 Justification = requestDto.Justification,
                 ConfirmationDate = DateTime.UtcNow,
-                IdentityUser = user,
                 UserID = userId,
                 Status = RequestStatus.Processing.ToString(),
                 Link = requestDto.Link

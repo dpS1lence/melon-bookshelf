@@ -6,6 +6,7 @@ namespace MelonBookshelfApi.Services.Contracts
 {
     public interface IRequestService
     {
+        Task<IEnumerable<ResourceRequestDto>> GetRequestsByUserId(string userId);
         Task<ProcessRequestResult> ProcessRequestAsync(ResourceRequestDto requestDto, string userId);
     }
 }

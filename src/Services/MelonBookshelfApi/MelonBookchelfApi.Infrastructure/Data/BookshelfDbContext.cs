@@ -22,6 +22,7 @@ namespace MelonBookchelfApi.Infrastructure.Data
         public DbSet<RequestUpvoter> RequestsUpvoters { get; set; } = null!;
         public DbSet<ResourceCategory> ResourceCategories { get; set; } = null!;
         public DbSet<Request> Requests { get; set; } = null!;
+        public DbSet<UserResource> UsersResources { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -35,6 +36,12 @@ namespace MelonBookchelfApi.Infrastructure.Data
             {
                 a.RequestId,
                 a.UserID
+            });
+
+            builder.Entity<UserResource>().HasKey(a => new
+            {
+                a.ResourceId,
+                a.UserId
             });
 
             base.OnModelCreating(builder);
