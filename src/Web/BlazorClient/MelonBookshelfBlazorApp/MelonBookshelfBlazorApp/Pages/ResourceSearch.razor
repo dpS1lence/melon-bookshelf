@@ -1,0 +1,107 @@
+﻿@page "/resourcesearch"
+
+<h3>Resource Search</h3>
+
+<div class="search-form">
+    <div class="form-group">
+        <label for="resourceType">Type:</label>
+        <select id="resourceType" class="form-control" @bind="@SelectedType">
+            <option value="">All</option>
+            <option value="Type1">Type1</option>
+            <option value="Type2">Type2</option>
+            <option value="Type3">Type3</option>
+        </select>
+    </div>
+
+ <div class="form-group">
+    <label for="category">Category:</label>
+    <select id="category" class="form-control" @bind="@SelectedCategory">
+        <option value="">All</option>
+        @foreach (var category in Categories)
+        {
+            <option value="@category">@category</option>
+        }
+    </select>
+</div>
+
+    <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" id="title" class="form-control" @bind="@Title" />
+    </div>
+
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" @onclick="Search">Search</button>
+        <button type="button" class="btn btn-secondary" @onclick="Reset">Reset</button>
+    </div>
+</div>
+
+<style>
+    .search-form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .btn-primary {
+        margin-right: 10px;
+    }
+</style>
+
+@code {
+    private string SelectedType { get; set; }
+    private string SelectedCategory { get; set; }
+    private string Title { get; set; }
+
+  private void Search()
+    {
+        // Redirect to the search results page with the search parameters as query string
+       // Navigation.NavigateTo($"/search-results?type={TypeFilter}&category={CategoryFilter}&title={TitleFilter}");
+    }
+
+    private void Reset()
+    {
+        SelectedType = "";
+        SelectedCategory = "";
+        Title = "";
+    }
+     private List<string> Categories { get; set; } = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        // Simulate retrieving categories from your project
+        // Replace this with your actual logic to fetch categories from your data source
+        Categories = GetCategories();
+    }
+
+    private List<string> GetCategories()
+    {
+        // Implement your logic to fetch categories from your data source
+        // Return a list of categories
+        return new List<string>
+        {
+            "Category1",
+            "Category2",
+            "Category3"
+        };
+    }
+}
+

@@ -1,0 +1,135 @@
+﻿@page "/search-results"
+@using System.Collections.Generic
+
+<h3>Search Results</h3>
+
+@if (Resources != null && Resources.Any())
+{
+    <div class="search-results">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Author</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Date Added</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var resource in Resources)
+                {
+                    <tr>
+                        <td>@resource.Type</td>
+                        <td>@resource.Category</td>
+                        <td>@resource.Author</td>
+                        <td>@resource.Title</td>
+                        <td>@resource.Status</td>
+                        <td>@resource.DateAdded.ToShortDateString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No results found.</p>
+}
+
+<style>
+    .search-results {
+        margin-top: 20px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+            .table th:first-child,
+            .table td:first-child {
+                font-weight: bold;
+                border-left: 1px solid #ddd;
+            }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tr:nth-child(odd) {
+            background-color: #f6f6f6;
+        }
+
+        .table tr:hover {
+            background-color: #e0eaf3;
+        }
+
+    p {
+        margin-top: 20px;
+        font-style: italic;
+    }
+</style>
+
+@code {
+    private List<Resource> Resources { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // Simulate fetching search results
+        // Replace this with your actual search logic
+
+        // Example: Assuming you have a Search method that returns a list of resources
+        Resources = Search();
+    }
+
+    private List<Resource> Search()
+    {
+        // Implement your logic to fetch search results based on the search criteria
+        // Return a list of resources that match the search
+
+        // Example: Mock search results
+        return new List<Resource>
+        {
+            new Resource
+            {
+                Type = "Type1",
+                Category = "Category1",
+                Author = "Author1",
+                Title = "Title1",
+                Status = "Status1",
+                DateAdded = DateTime.Now
+            },
+            new Resource
+            {
+                Type = "Type2",
+                Category = "Category2",
+                Author = "Author2",
+                Title = "Title2",
+                Status = "Status2",
+                DateAdded = DateTime.Now.AddDays(-1)
+            },
+            // Add more search results as needed
+        };
+    }
+
+    public class Resource
+    {
+        public string Type { get; set; }
+        public string Category { get; set; }
+        public string Author { get; set; }
+        public string Title { get; set; }
+        public string Status { get; set; }
+        public DateTime DateAdded { get; set; }
+    }
+}
