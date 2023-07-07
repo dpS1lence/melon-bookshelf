@@ -24,7 +24,7 @@ namespace MelonBookshelfApi.Controllers
 
         [HttpPost]
         [Route("users/register")]
-        public async Task<IActionResult> Register(UserRegistrationDto request)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationDto request)
         {
             _logger.LogInformation("User Registration request received.");
 
@@ -43,7 +43,7 @@ namespace MelonBookshelfApi.Controllers
 
         [HttpPost]
         [Route("users/login")]
-        public async Task<IActionResult> Login(UserLoginDto request)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto request)
         {
             _logger.LogInformation("User Login request received.");
 

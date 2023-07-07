@@ -61,7 +61,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
 
         [HttpGet]
         [Route("resources/{physical-resource-id}")]
-        public async Task<IActionResult> PhysicalResourceById([FromBody] string pysicalResourceId)
+        public async Task<IActionResult> PhysicalResourceById(string pysicalResourceId)
         {
             var physicalResource = await _resourceService.GetPhysicalResourceByIdAsync(pysicalResourceId);
 
@@ -69,11 +69,18 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         }
 
         [HttpGet]
-        [Route("resources/taken")]
-        public async Task<IActionResult> PhysicalResourcesByUserId()
+        [Route("resources/{resource-id}")]
+        public async Task<IActionResult> ResourceById(string resourceId)
         {
-            var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
+            var physicalResource = await _resourceService.GetResourceByIdAsync(resourceId);
 
+            return Ok(physicalResource);
+        }
+
+        [HttpGet]
+        [Route("resources/{userId}/taken")]
+        public async Task<IActionResult> PhysicalResourcesByUserId(string userId)
+        {
             var physicalResources = await _resourceService.GetPhysicalResourcesByUserIdAsync(userId);
 
             return Ok(physicalResources);

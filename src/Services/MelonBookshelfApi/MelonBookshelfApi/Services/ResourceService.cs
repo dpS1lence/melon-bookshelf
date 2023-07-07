@@ -4,8 +4,6 @@ using MelonBookchelfApi.Infrastructure.Repositories;
 using MelonBookshelfApi.ResponceModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design;
-using static System.Reflection.Metadata.BlobBuilder;
 using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
 namespace MelonBookshelfApi.Services
@@ -25,11 +23,53 @@ namespace MelonBookshelfApi.Services
             _userManager = userManager;
         }
 
+        public async Task AddResource(ResourceHRModel model)
+        {
+            var resource = _mapper.Map<Resource>(model);
+
+            var category = await _repository.All<ResourceCategory>().Where(a => a.Name == model.Category).FirstOrDefaultAsync();
+
+            if(category == null)
+            {
+                throw new ArgumentNullException(nameof(category));
+            }
+
+            resource.CategoryID = category.Id;
+
+            await _repository.AddAsync(resource);
+            await _repository.SaveChangesAsync();
+        }
+
         public IEnumerable<ResourceModel> GetAllResources()
         {
             var resources = _repository.All<Resource>();
 
-            return _mapper.Map<IEnumerable<ResourceModel>>(resources);
+            var list = new List<ResourceModel>();
+
+            foreach (var item in resources)
+            {
+                item.ResourceCategory = _repository.All<ResourceCategory>().Where(a => a.Id == item.CategoryID).FirstOrDefault();
+
+                list.Add(_mapper.Map<ResourceModel>(item));
+            }
+
+            return list;
+        }
+
+        public IEnumerable<ResourceHRModel> GetAllResourcesHR()
+        {
+            var resources = _repository.All<Resource>();
+
+            var list = new List<ResourceHRModel>();
+
+            foreach (var item in resources)
+            {
+                item.ResourceCategory = _repository.All<ResourceCategory>().Where(a => a.Id == item.CategoryID).FirstOrDefault();
+
+                list.Add(_mapper.Map<ResourceHRModel>(item));
+            }
+
+            return list;
         }
 
         public IEnumerable<string> GetCategoriesAsync()
@@ -65,6 +105,20 @@ namespace MelonBookshelfApi.Services
                 .ToListAsync();
 
             var map = _mapper.Map<IEnumerable<PhysicalResourceTaken>>(userResources);
+
+            return map;
+        }
+
+        public async Task<ResourceModel> GetResourceByIdAsync(string resourceId)
+        {
+            var resource = await _repository.GetByIdAsync<Resource>(resourceId);
+
+            if (resource == null)
+            {
+                throw new ArgumentException("Resource is null");
+            }
+
+            var map = _mapper.Map<ResourceModel>(resource);
 
             return map;
         }

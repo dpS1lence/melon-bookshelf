@@ -1,5 +1,6 @@
 ﻿using MelonBookshelfApi.Controllers.BaseUser;
 using MelonBookshelfApi.ResponceModels;
+using MelonBookshelfApi.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,33 +12,37 @@ namespace MelonBookshelfApi.Controllers.HR
     public class HRDashboardController : Controller
     {
         private readonly ILogger _logger;
+        private readonly IRequestService _requestService;
+        private readonly IResourceService _resourceService;
 
-        public HRDashboardController(ILogger<HRDashboardController> logger)
+        public HRDashboardController(ILogger<HRDashboardController> logger, IRequestService requestService, IResourceService resourceService)
         {
             _logger = logger;
+            _requestService = requestService;
+            _resourceService = resourceService;
         }
 
         [HttpGet("hrdashboard/requests")]
         public IActionResult GetRequests()
         {
-            return Ok();
+            var requests = _requestService.GetRequests();
+
+            return Ok(requests);
         }
 
         [HttpGet("hrdashboard/resources")]
         public IActionResult GetAllResourcesForHR()
         {
-            return Ok();
+            var resources = _resourceService.GetAllResourcesHR();
+
+            return Ok(resources);
         }
 
-        [HttpGet("hrdashboard/resources/{resourceId}")]
-        public IActionResult GetResourceDetails([FromBody] int resourceId)
+        [HttpPost("hrdashboard/create-resource")]
+        public async Task<IActionResult> AddResource([FromBody] ResourceHRModel model)
         {
-            return Ok();
-        }
+            await _resourceService.AddResource(model);
 
-        [HttpPost("hrdashboard/resources")]
-        public IActionResult AddResource([FromBody] ResourceModel resource)
-        {
             return Ok();
         }
     }

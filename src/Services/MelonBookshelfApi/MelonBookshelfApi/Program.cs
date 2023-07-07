@@ -38,6 +38,8 @@ builder.Services.AddLogging();
 builder.Services.AddScoped<IResourceService, ResourceService>();
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddScoped<IHrActionsService, HrActionsService>();
+builder.Services.AddScoped<IBaseUserAutomationService, BaseUserAutomationService>();
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<MappingProfiles>();

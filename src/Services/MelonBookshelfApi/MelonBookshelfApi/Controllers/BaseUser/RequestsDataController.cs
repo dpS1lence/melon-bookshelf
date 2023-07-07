@@ -25,9 +25,8 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         [Route("requests/create")]
         public async Task<IActionResult> AddRequest([FromBody] ResourceRequestDto requestDto)
         {
-            var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
+            var result = await _requestService.ProcessRequestAsync(requestDto, requestDto.UserId);
 
-            var result = await _requestService.ProcessRequestAsync(requestDto, userId);
             if (result.ProcessRequest == ProcessRequest.UnableToProcessRequest)
             {
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -45,11 +44,9 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         }
 
         [HttpGet]
-        [Route("requests/get-by-userid")]
-        public async Task<IActionResult> GetRequestsByUserId()
+        [Route("requests/{userId}/get-by-userid")]
+        public async Task<IActionResult> GetRequestsByUserId(string userId)
         {
-            var userId = User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.NameIdentifier)?.Value;
-
             var result = await _requestService.GetRequestsByUserId(userId);
 
             return Ok(result);
@@ -57,7 +54,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
 
         [HttpGet]
         [Route("requests/{requestId}")]
-        public async Task<IActionResult> GetRequestById([FromBody] int requestId)
+        public async Task<IActionResult> GetRequestById(int requestId)
         {
             var result = await _requestService.GetRequestById(requestId);
 

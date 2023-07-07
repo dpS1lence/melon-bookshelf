@@ -35,6 +35,13 @@ namespace MelonBookshelfApi.Services
             return _mapper.Map<ResourceRequestDto>(request);
         }
 
+        public IEnumerable<ResourceRequestDto> GetRequests()
+        {
+            var request = _repository.All<Request>().AsEnumerable();
+
+            return _mapper.Map<IEnumerable<ResourceRequestDto>>(request);
+        }
+
         public async Task<IEnumerable<UserRequestedResourceModel>> GetRequestsByUserId(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -44,24 +51,26 @@ namespace MelonBookshelfApi.Services
                 throw new ArgumentException("Invalid User");
             }
 
-            var requests = _repository.All<Request>().Where(a => a.UserID == userId);
+            var requests = _repository.All<Request>().AsNoTracking().Where(a => a.UserID == userId).ToList();
 
             var model = new List<UserRequestedResourceModel>();
             foreach (var item in requests)
             {
                 var followersCollection = _repository
                     .All<RequestFollower>()
+                    .AsNoTracking()
                     .Where(a => a.RequestId == item.Id)
                     .Include(a => a.IdentityUser)
                     .Select(a => new User { Id = a.IdentityUser.Id, Name = a.IdentityUser.UserName })
-                    .AsEnumerable();
+                    .ToList();
 
                 var upvotersCollection = _repository
                     .All<RequestFollower>()
+                    .AsNoTracking()
                     .Where(a => a.RequestId == item.Id)
                     .Include(a => a.IdentityUser)
                     .Select(a => new User { Id = a.IdentityUser.Id, Name = a.IdentityUser.UserName })
-                    .AsEnumerable();
+                    .ToList();
 
                 model.Add(new UserRequestedResourceModel
                 {
@@ -71,9 +80,9 @@ namespace MelonBookshelfApi.Services
                     Status = item.Status,
                     Title = item.Title,
                     FollowersCollection = followersCollection,
-                    FollowersCount = followersCollection.Count(),
+                    FollowersCount = followersCollection.Count,
                     UpvotersCollection = upvotersCollection,
-                    UpvotersCount = upvotersCollection.Count()
+                    UpvotersCount = upvotersCollection.Count
                 });
             }
 
@@ -127,11 +136,9 @@ namespace MelonBookshelfApi.Services
                 Link = requestDto.Link
             };
 
-            // Save the resource request to the database
             await _repository.AddAsync(resourceRequest);
             await _repository.SaveChangesAsync();
 
-            // Send confirmation emails to the user and admin
             //SendConfirmationEmailToUser(resourceRequest);
             //SendConfirmationEmailToAdmin(resourceRequest);
 
