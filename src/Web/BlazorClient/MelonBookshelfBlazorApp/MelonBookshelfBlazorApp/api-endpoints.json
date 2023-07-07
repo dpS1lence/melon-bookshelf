@@ -1,0 +1,39 @@
+{
+    "ApiEndpoints": {
+        "Authentication": {
+            "Register": "users/register",
+            "Login": "users/login"
+        },
+        "BaseUserActions": {
+            "ReturnPhysicalResource": "user-actions/{resourceId}/{userId}/return-physical-resource",
+            "GetPhysicalResource": "user-actions/{resourceId}/{userId}/get-physical-resource",
+            "UpvoteRequest": "user-actions/{requestId}/{userId}/upvote",
+            "FollowRequest": "user-actions/{requestId}/{userId}/follow"
+        },
+        "HRActions": {
+            "ConfirmRequest": "hr-actions/requests/{requestId}/confirm",
+            "RejectRequest": "hr-actions/requests/{requestId}/reject",
+            "SetResourceInProgress": "hr-actions/resources/{resourceId}/inprogress",
+            "SetResourceInDelivery": "hr-actions/resources/{resourceId}/delivery",
+            "SetResourceDelivered": "hr-actions/resources/{resourceId}/delivered"
+        },
+        "HRDashboard": {
+            "GetRequests": "hrdashboard/requests",
+            "GetAllResourcesForHR": "hrdashboard/resources",
+            "AddResource": "hrdashboard/create-resource"
+        },
+        "RequestsData": {
+            "AddRequest": "requests/create",
+            "GetRequestsByUserId": "requests/{userId}/get-by-userid",
+            "GetRequestById": "requests/{requestId}"
+        },
+        "ResourcesData": {
+            "Resources": "resources",
+            "SearchResources": "resources/search",
+            "GetResourcesCategories": "resources/categories",
+            "PhysicalResourceById": "resources/{physical-resource-id}",
+            "ResourceById": "resources/{resource-id}",
+            "PhysicalResourcesByUserId": "resources/{userId}/taken"
+        }
+    }
+}
