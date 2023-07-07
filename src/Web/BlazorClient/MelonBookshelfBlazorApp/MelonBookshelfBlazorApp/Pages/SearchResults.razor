@@ -1,33 +1,42 @@
 ﻿@page "/search-results"
 @using System.Collections.Generic
+@inject NavigationManager NavigationManager
 
 <h3>Search Results</h3>
 
-@if (Resources != null && Resources.Any())
+@if (FilteredResources != null && FilteredResources.Any())
 {
     <div class="search-results">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Author</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Date Added</th>
+                    <th>Name</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var resource in Resources)
+                @foreach (var resource in FilteredResources)
                 {
                     <tr>
-                        <td>@resource.Type</td>
-                        <td>@resource.Category</td>
-                        <td>@resource.Author</td>
                         <td>@resource.Title</td>
-                        <td>@resource.Status</td>
-                        <td>@resource.DateAdded.ToShortDateString()</td>
+                        <td>
+                            <button class="preview-button" @onclick="() => ShowDetails(resource)">Preview</button>
+                        </td>
                     </tr>
+                    @if (resource.ShowDetails)
+                    {
+                        <tr>
+                            <td colspan="2">
+                                <div class="details">
+                                    <div><strong>Type:</strong> @resource.Type</div>
+                                    <div><strong>Category:</strong> @resource.Category</div>
+                                    <div><strong>Author:</strong> @resource.Author</div>
+                                    <div><strong>Status:</strong> @resource.Status</div>
+                                    <div><strong>Date Added:</strong> @resource.DateAdded.ToShortDateString()</div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
@@ -71,18 +80,34 @@ else
             background-color: #f6f6f6;
         }
 
-        .table tr:hover {
-            background-color: #e0eaf3;
-        }
+    .preview-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
 
-    p {
-        margin-top: 20px;
-        font-style: italic;
+    .details {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f6f6f6;
     }
 </style>
 
 @code {
     private List<Resource> Resources { get; set; }
+    private List<Resource> FilteredResources { get; set; }
+
+    [Parameter]
+    public string Type { get; set; }
+
+    [Parameter]
+    public string Category { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
 
     protected override void OnInitialized()
     {
@@ -91,6 +116,8 @@ else
 
         // Example: Assuming you have a Search method that returns a list of resources
         Resources = Search();
+
+        FilteredResources = FilterResources();
     }
 
     private List<Resource> Search()
@@ -123,6 +150,22 @@ else
         };
     }
 
+    private List<Resource> FilterResources()
+    {
+        // Filter the resources based on the selected category
+        if (!string.IsNullOrEmpty(Category))
+        {
+            return Resources.Where(r => r.Category == Category).ToList();
+        }
+
+        return Resources;
+    }
+
+    private void ShowDetails(Resource resource)
+    {
+        resource.ShowDetails = !resource.ShowDetails;
+    }
+
     public class Resource
     {
         public string Type { get; set; }
@@ -131,5 +174,7 @@ else
         public string Title { get; set; }
         public string Status { get; set; }
         public DateTime DateAdded { get; set; }
+
+        public bool ShowDetails { get; set; }
     }
 }

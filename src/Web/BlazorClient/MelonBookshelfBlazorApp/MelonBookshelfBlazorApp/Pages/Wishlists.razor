@@ -1,0 +1,185 @@
+﻿@page "/wishlist"
+@using System.Collections.Generic
+
+<h3>Wishlist</h3>
+
+@if (Wishlist != null && Wishlist.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Date Added</th>
+                <th>Upvotes</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var wish in Wishlist)
+            {
+                <tr>
+                    <td>@wish.Status</td>
+                    <td>@wish.Category</td>
+                    <td>@wish.Author</td>
+                    <td>@wish.Title</td>
+                    <td>@wish.Priority</td>
+                    <td>@wish.DateAdded.ToShortDateString()</td>
+                    <td>@wish.Upvotes</td>
+                    <td>
+                        @if (!wish.IsUpvoted)
+                        {
+                            <button class="upvote-button" @onclick="() => UpvoteWish(wish)">Upvote</button>
+                        }
+                        else
+                        {
+                            <button class="upvote-button upvoted" disabled>Upvoted</button>
+                        }
+                    </td>
+                    <td>
+                        <button class="edit-button" @onclick="() => EditWish(wish)">Edit</button>
+                    </td>
+                    <td>
+                        <button class="delete-button" @onclick="() => DeleteWish(wish)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No wishes found.</p>
+}
+
+<style>
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .table td:first-child {
+            font-weight: bold;
+        }
+
+    p {
+        margin-top: 20px;
+        font-style: italic;
+    }
+
+    .upvote-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .upvote-button.upvoted {
+            background-color: #28a745;
+        }
+
+    .edit-button {
+        background-color: #ffc107;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-button {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+</style>
+
+@code {
+    private List<Wish> Wishlist { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // Simulate fetching wishlist resources
+        Wishlist = new List<Wish>
+        {
+            new Wish
+            {
+                Status = "In Progress",
+                Category = "Category 1",
+                Author = "Author 1",
+                Title = "Title 1",
+                Priority = 1,
+                DateAdded = DateTime.Now.AddDays(-7),
+                Upvotes = 10
+            },
+            new Wish
+            {
+                Status = "Not Started",
+                Category = "Category 2",
+                Author = "Author 2",
+                Title = "Title 2",
+                Priority = 2,
+                DateAdded = DateTime.Now.AddDays(-14),
+                Upvotes = 5
+            },
+            // Add more wishlist resources as needed
+        };
+    }
+
+    private void UpvoteWish(Wish wish)
+    {
+        if (!wish.IsUpvoted)
+        {
+            wish.Upvotes++;
+            wish.IsUpvoted = true;
+        }
+    }
+
+    private void EditWish(Wish wish)
+    {
+        // Handle editing the wish here
+        // You can navigate to an edit page or show an edit form/modal
+        // Example: NavigationManager.NavigateTo($"/edit-wish/{wish.Id}");
+    }
+
+    private void DeleteWish(Wish wish)
+    {
+        // Handle deleting the wish here
+        // Example: Wishlist.Remove(wish);
+    }
+
+    public class Wish
+    {
+        public string Status { get; set; }
+        public string Category { get; set; }
+        public string Author { get; set; }
+        public string Title { get; set; }
+        public int Priority { get; set; }
+        public DateTime DateAdded { get; set; }
+        public int Upvotes { get; set; }
+        public bool IsUpvoted { get; set; }
+    }
+}

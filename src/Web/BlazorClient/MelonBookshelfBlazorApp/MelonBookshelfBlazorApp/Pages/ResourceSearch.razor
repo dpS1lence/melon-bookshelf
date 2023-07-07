@@ -1,4 +1,8 @@
-﻿@page "/resourcesearch"
+﻿@page "/resource-search"
+@using System.Collections.Generic
+@using System.Web
+@inject NavigationManager NavigationManager
+
 
 <h3>Resource Search</h3>
 
@@ -71,17 +75,49 @@
     private string SelectedCategory { get; set; }
     private string Title { get; set; }
 
-  private void Search()
+    private string TypeFilter { get; set; }
+    private string CategoryFilter { get; set; }
+    private string TitleFilter { get; set; }
+
+    private void Search()
     {
-        // Redirect to the search results page with the search parameters as query string
-       // Navigation.NavigateTo($"/search-results?type={TypeFilter}&category={CategoryFilter}&title={TitleFilter}");
+        var queryString = ConstructQueryString();
+
+        NavigationManager.NavigateTo($"/search-results{queryString}");
+    }
+
+    private string ConstructQueryString()
+    {
+        var parameters = new Dictionary<string, string>();
+        if (!string.IsNullOrEmpty(TypeFilter))
+        {
+            parameters["type"] = HttpUtility.UrlEncode(TypeFilter);
+        }
+        if (!string.IsNullOrEmpty(CategoryFilter))
+        {
+            parameters["category"] = HttpUtility.UrlEncode(CategoryFilter);
+        }
+        if (!string.IsNullOrEmpty(TitleFilter))
+        {
+            parameters["title"] = HttpUtility.UrlEncode(TitleFilter);
+        }
+
+        var queryString = string.Join("&", parameters.Select(p => $"{p.Key}={p.Value}"));
+
+        if (!string.IsNullOrEmpty(queryString))
+        {
+            queryString = "?" + queryString;
+        }
+
+        return queryString;
     }
 
     private void Reset()
     {
-        SelectedType = "";
-        SelectedCategory = "";
-        Title = "";
+        // Reset the search filters
+        TypeFilter = "";
+        CategoryFilter = "";
+        TitleFilter = "";
     }
      private List<string> Categories { get; set; } = new List<string>();
 
