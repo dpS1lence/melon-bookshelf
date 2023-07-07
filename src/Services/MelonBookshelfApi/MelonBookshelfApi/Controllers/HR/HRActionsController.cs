@@ -17,7 +17,7 @@ namespace MelonBookshelfApi.Controllers.HR
             _automationService = automationService;
         }
 
-        [HttpPut("hrdashboard/requests/{requestId}/confirm")]
+        [HttpPut("hr-actions/requests/{requestId}/confirm")]
         public async Task<IActionResult> ConfirmRequest(int requestId)
         {
             await _automationService.Confirm(requestId);
@@ -25,7 +25,7 @@ namespace MelonBookshelfApi.Controllers.HR
             return Ok();
         }
 
-        [HttpPut("hrdashboard/requests/{requestId}/reject")]
+        [HttpPut("hr-actions/requests/{requestId}/reject")]
         public async Task<IActionResult> RejectRequest(int requestId, [FromBody] string justification)
         {
             await _automationService.Reject(requestId, justification);
@@ -33,7 +33,7 @@ namespace MelonBookshelfApi.Controllers.HR
             return Ok();
         }
 
-        [HttpPut("hrdashboard/resources/{resourceId}/inprogress")]
+        [HttpPut("hr-actions/resources/{resourceId}/inprogress")]
         public async Task<IActionResult> SetResourceInProgress(int resourceId)
         {
             await _automationService.SetResource(resourceId, ResourceStatus.Processing.ToString());
@@ -41,15 +41,15 @@ namespace MelonBookshelfApi.Controllers.HR
             return Ok();
         }
 
-        [HttpPut("hrdashboard/resources/{resourceId}/delivery")]
-        public async Task<IActionResult> SetResourceDelivery(int resourceId)
+        [HttpPut("hr-actions/resources/{resourceId}/delivery")]
+        public async Task<IActionResult> SetResourceInDelivery(int resourceId)
         {
             await _automationService.SetResource(resourceId, ResourceStatus.InDelivery.ToString());
 
             return Ok();
         }
 
-        [HttpPut("hrdashboard/resources/{resourceId}/delivered")]
+        [HttpPut("hr-actions/resources/{resourceId}/delivered")]
         public async Task<IActionResult> SetResourceDelivered(int resourceId)
         {
             await _automationService.SetResource(resourceId, ResourceStatus.Delivered.ToString());

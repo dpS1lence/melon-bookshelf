@@ -22,7 +22,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         }
 
         [HttpPut]
-        [Route("user-automation/{resourceId}/{userId}/return-physical-resource")]
+        [Route("user-actions/{resourceId}/{userId}/return-physical-resource")]
         public async Task<IActionResult> ReturnPhysicalResource(int resourceId, string userId)
         {
             await _automationService.ReturnPhysicalResource(resourceId, userId);
@@ -31,7 +31,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         }
 
         [HttpPut]
-        [Route("user-automation/{resourceId}/{userId}/get")]
+        [Route("user-actions/{resourceId}/{userId}/get-physical-resource")]
         public async Task<IActionResult> GetPhysicalResource(int resourceId, string userId)
         {
             await _automationService.GetPhysicalResource(resourceId, userId);
@@ -40,7 +40,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         }
 
         [HttpPut]
-        [Route("user-automation/{requestId}/{userId}/upvote")]
+        [Route("user-actions/{requestId}/{userId}/upvote")]
         public async Task<IActionResult> UpvoteRequest(int requestId, string userId)
         {
             await _automationService.UpvoteRequest(requestId, userId);
@@ -49,7 +49,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
         }
 
         [HttpPut]
-        [Route("user-automation/{requestId}/{userId}/follow")]
+        [Route("user-actions/{requestId}/{userId}/follow")]
         public async Task<IActionResult> FollowRequest(int requestId, string userId)
         {
             await _automationService.FollowRequest(requestId, userId);
