@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfBlazorApp.ApiEndpoints
 {
-    public class BaseUserActionsOptions
+    public class BaseUserActions
     {
         public string ReturnPhysicalResource { get; set; } = default!;
 

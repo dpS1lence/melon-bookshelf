@@ -57,14 +57,14 @@
         <input type="password" id="password" class="form-control" @bind="@Password" />
     </div>
 
-    <button type="button" class="btn-login" @onclick="LogInFunc">Login</button>
+    <button type="button" class="btn-login" @onclick="LogIn">Login</button>
 </div>
 
 @code {
     private string Email { get; set; }
     private string Password { get; set; }
 
-    private void LogInFunc()
+    private void LogIn()
     {
         // Perform login logic here
         // Example: check if email and password are valid

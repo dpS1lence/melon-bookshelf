@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfBlazorApp.ApiEndpoints
 {
-    public class RequestsDataOptions
+    public class RequestsData
     {
         public string AddRequest { get; set; } = default!;
 

@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfBlazorApp.ApiEndpoints
 {
-    public class HRActionsOptions
+    public class HRActions
     {
         public string ConfirmRequest { get; set; } = default!;
 

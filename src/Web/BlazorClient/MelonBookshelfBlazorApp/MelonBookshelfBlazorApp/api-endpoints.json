@@ -1,8 +1,5 @@
 {
     "ApiEndpoints": {
-        "BaseAdress": {
-            "Adress": "http://localhost:5212/api/"
-        },
         "Authentication": {
             "Register": "users/register",
             "Login": "users/login"
