@@ -13,9 +13,9 @@ namespace MelonBookshelfApi.Controllers.BaseUser
     public class BaseUserActionsController : Controller
     {
         private readonly ILogger _logger;
-        private readonly IBaseUserAutomationService _automationService;
+        private readonly IBaseUserActionsService _automationService;
 
-        public BaseUserActionsController(ILogger<BaseUserActionsController> logger, IBaseUserAutomationService automationService)
+        public BaseUserActionsController(ILogger<BaseUserActionsController> logger, IBaseUserActionsService automationService)
         {
             _logger = logger;
             _automationService = automationService;

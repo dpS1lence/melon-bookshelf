@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfApi.Services.Contracts
 {
-    public interface IBaseUserAutomationService
+    public interface IBaseUserActionsService
     {
         Task ReturnPhysicalResource(int resourceId, string userId);
         

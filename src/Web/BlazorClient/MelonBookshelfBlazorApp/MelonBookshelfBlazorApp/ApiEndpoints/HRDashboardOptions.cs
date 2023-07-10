@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfBlazorApp.ApiEndpoints
 {
-    public class HRDashboard
+    public class HRDashboardOptions
     {
         public string GetRequests { get; set; } = default!;
 

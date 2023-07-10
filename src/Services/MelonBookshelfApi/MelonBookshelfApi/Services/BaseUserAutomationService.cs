@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MelonBookshelfApi.Services
 {
-    public class BaseUserAutomationService : IBaseUserAutomationService
+    public class BaseUserAutomationService : IBaseUserActionsService
     {
         private readonly IRepository _repository;
         private readonly ILogger _logger;

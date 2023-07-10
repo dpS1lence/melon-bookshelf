@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfBlazorApp.ApiEndpoints
 {
-    public class Authentication
+    public class AuthenticationOptions
     {
         public string Register { get; set; } = default!;
 

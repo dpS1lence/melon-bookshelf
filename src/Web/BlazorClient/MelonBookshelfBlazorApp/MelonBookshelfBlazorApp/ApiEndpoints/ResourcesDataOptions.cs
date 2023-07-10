@@ -1,6 +1,6 @@
 ﻿namespace MelonBookshelfBlazorApp.ApiEndpoints
 {
-    public class ResourcesData
+    public class ResourcesDataOptions
     {
         public string Resources { get; set; } = default!;
 
