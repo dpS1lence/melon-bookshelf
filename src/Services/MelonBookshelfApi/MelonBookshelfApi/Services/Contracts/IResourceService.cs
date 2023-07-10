@@ -4,8 +4,8 @@ namespace MelonBookshelfApi.Services.Contracts
 {
     public interface IResourceService
     {
-        IEnumerable<ResourceHRModel> GetAllResourcesHR();
-        IEnumerable<ResourceModel> GetAllResources();
+        Task<IEnumerable<ResourceHRModel>> GetAllResourcesHR();
+        Task<IEnumerable<ResourceModel>> GetAllResources();
         Task AddResource(ResourceHRModel model);
         IEnumerable<string> GetCategoriesAsync();
         Task<PhysicalResource> GetPhysicalResourceByIdAsync(string pysicalResourceId);

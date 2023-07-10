@@ -1,9 +1,15 @@
 ﻿@page "/borrowed-resources"
 @using System.Collections.Generic
+@using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
+@using MelonBookshelfBlazorApp.Services;
+@using Newtonsoft.Json;
+@inject ResourcesFetcher _resourceFetcher
+@inject AuthenticationService _auth
 
 <h3>Borrowed Resources</h3>
 
-@if (ResourcesBorrowed != null && ResourcesBorrowed.Any())
+@if (resources != null && resources.Any())
 {
     <table class="table">
         <thead>
@@ -18,18 +24,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var resource in ResourcesBorrowed)
+            @foreach (var resource in resources)
             {
                 <tr>
                     <td>@resource.Type</td>
-                    <td>@resource.Category</td>
                     <td>@resource.Author</td>
                     <td>@resource.Title</td>
-                    <td>@resource.BorrowDate.ToShortDateString()</td>
-                    <td>@resource.ExpectedReturnDate.ToShortDateString()</td>
-                    <td>
+                   @* <td>
                         <button class="return-button" @onclick="() => ReturnResource(resource)">Return</button>
-                    </td>
+                    </td>*@
                 </tr>
             }
         </tbody>
@@ -79,50 +82,18 @@ else
 </style>
 
 @code {
-    private List<BorrowedResource> ResourcesBorrowed { get; set; }
+    private IEnumerable<Resource> resources;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Simulate fetching borrowed resources
-        ResourcesBorrowed = new List<BorrowedResource>
-        {
-            new BorrowedResource
-            {
-                Type = "Type1",
-                Category = "Category1",
-                Author = "Author1",
-                Title = "Title1",
-                BorrowDate = DateTime.Now.AddDays(-7),
-                ExpectedReturnDate = DateTime.Now.AddDays(7),
-            },
-            new BorrowedResource
-            {
-                Type = "Type2",
-                Category = "Category2",
-                Author = "Author2",
-                Title = "Title2",
-                BorrowDate = DateTime.Now.AddDays(-14),
-                ExpectedReturnDate = DateTime.Now.AddDays(14),
-            },
-            // Add more borrowed resources as needed
-        };
-    }
+        var token = await _auth.GetToken();
 
-    private void ReturnResource(BorrowedResource resource)
-    {
-        // Implement your logic to handle the return action for the borrowed resource
-        // For example, you can remove the resource from the BorrowedResources list or perform other operations
+        _resourceFetcher.SetBearerToken(token);
 
-        ResourcesBorrowed.Remove(resource);
-    }
+        var response = await _resourceFetcher.Resources();
 
-    public class BorrowedResource
-    {
-        public string Type { get; set; }
-        public string Category { get; set; }
-        public string Author { get; set; }
-        public string Title { get; set; }
-        public DateTime BorrowDate { get; set; }
-        public DateTime ExpectedReturnDate { get; set; }
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+
+        resources = result;
     }
 }

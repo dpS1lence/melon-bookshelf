@@ -13,6 +13,9 @@ namespace MelonBookchelfApi.Infrastructure.Data
 {
     public class BookshelfDbContext : IdentityDbContext<IdentityUser>
     {
+        public BookshelfDbContext()
+        { }
+
         public BookshelfDbContext(DbContextOptions<BookshelfDbContext> options)
             : base(options)
         { }

@@ -1,5 +1,6 @@
 using MelonBookshelfBlazorApp;
-using MelonBookshelfBlazorApp.ApiEndpoints;
+using MelonBookshelfBlazorApp.Services;
+using MelonBookshelfBlazorApp.Services.Fetchers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -7,16 +8,15 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-//builder.Configuration.AddJsonFile("api-endpoints.json");
+builder.Services.AddHttpClient();
 
-var authentication = builder.Configuration.GetSection("ApiEndpoints").Get<Authentication>();
-var baseUserActions = builder.Configuration.GetSection("ApiEndpoints").Get<BaseUserActions>();
-var hrActions = builder.Configuration.GetSection("ApiEndpoints").Get<HRActions>();
-var hrDashboard = builder.Configuration.GetSection("ApiEndpoints").Get<HRDashboard>();
-var requestsData = builder.Configuration.GetSection("ApiEndpoints").Get<RequestsData>();
-var resourcesData = builder.Configuration.GetSection("ApiEndpoints").Get<ResourcesData>();
+builder.Services.AddScoped(sp => new AuthenticationFetcher(sp.GetRequiredService<HttpClient>()));
+builder.Services.AddScoped(sp => new ResourcesFetcher(sp.GetRequiredService<HttpClient>()));
+builder.Services.AddScoped<AuthenticationService>();
 
+var app = builder.Build();
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+var authenticationService = app.Services.GetRequiredService<AuthenticationService>();
+await authenticationService.InitializeClientToken();
 
-await builder.Build().RunAsync();
+await app.RunAsync();

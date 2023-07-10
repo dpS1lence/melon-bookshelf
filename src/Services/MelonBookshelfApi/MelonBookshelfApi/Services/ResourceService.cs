@@ -40,15 +40,21 @@ namespace MelonBookshelfApi.Services
             await _repository.SaveChangesAsync();
         }
 
-        public IEnumerable<ResourceModel> GetAllResources()
+        public async Task<IEnumerable<ResourceModel>> GetAllResources()
         {
-            var resources = _repository.All<Resource>();
+            var resources = await _repository.All<Resource>().AsNoTracking().ToListAsync();
 
             var list = new List<ResourceModel>();
 
             foreach (var item in resources)
             {
-                item.ResourceCategory = _repository.All<ResourceCategory>().Where(a => a.Id == item.CategoryID).FirstOrDefault();
+                var result = await _repository
+                    .All<ResourceCategory>()
+                    .AsNoTracking()
+                    .Where(a => a.Id == item.CategoryID)
+                    .FirstOrDefaultAsync();
+
+                item.ResourceCategory = result;
 
                 list.Add(_mapper.Map<ResourceModel>(item));
             }
@@ -56,15 +62,21 @@ namespace MelonBookshelfApi.Services
             return list;
         }
 
-        public IEnumerable<ResourceHRModel> GetAllResourcesHR()
+        public async Task<IEnumerable<ResourceHRModel>> GetAllResourcesHR()
         {
-            var resources = _repository.All<Resource>();
+            var resources = await _repository.All<Resource>().AsNoTracking().ToListAsync();
 
             var list = new List<ResourceHRModel>();
 
             foreach (var item in resources)
             {
-                item.ResourceCategory = _repository.All<ResourceCategory>().Where(a => a.Id == item.CategoryID).FirstOrDefault();
+                var result = await _repository
+                    .All<ResourceCategory>()
+                    .AsNoTracking()
+                    .Where(a => a.Id == item.CategoryID)
+                    .FirstOrDefaultAsync();
+
+                item.ResourceCategory = result;
 
                 list.Add(_mapper.Map<ResourceHRModel>(item));
             }

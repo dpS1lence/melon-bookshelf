@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MelonBookchelfApi.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace MelonBookchelfApi.Infrastructure.Repositories
         /// Entity framework DB context holding connection information and properties
         /// and tracking entity states 
         /// </summary>
-        protected DbContext Context { get; set; }
+        protected BookshelfDbContext Context { get; set; }
 
         /// <summary>
         /// Representation of table in database
@@ -25,7 +26,7 @@ namespace MelonBookchelfApi.Infrastructure.Repositories
             return this.Context.Set<T>();
         }
 
-        public Repository(DbContext context)
+        public Repository(BookshelfDbContext context)
         {
             Context = context;
         }

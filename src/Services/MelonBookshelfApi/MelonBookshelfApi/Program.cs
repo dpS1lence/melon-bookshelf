@@ -18,8 +18,6 @@ builder.Services.AddDbContext<BookshelfDbContext>(options =>
     options.UseSqlServer(connectionString)
 );
 
-builder.Services.AddScoped<DbContext, BookshelfDbContext>();
-
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     {
         options.Password.RequiredLength = 6;
@@ -44,6 +42,18 @@ builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<MappingProfiles>();
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("BlazorRequests", builder =>
+    {
+        builder.WithOrigins("https://localhost:7029")
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
+    });
+});
+
+
 
 var swaggerSettings = builder.Configuration.GetSection("Swagger").Get<SwaggerSettings>();
 
@@ -60,11 +70,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
-
+app.UseRouting();
+app.UseCors("BlazorRequests");
 app.UseAuthorization();
-
 app.MapControllers();
 
 try

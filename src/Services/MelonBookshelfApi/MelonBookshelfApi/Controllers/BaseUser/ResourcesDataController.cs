@@ -23,9 +23,9 @@ namespace MelonBookshelfApi.Controllers.BaseUser
 
         [HttpGet]
         [Route("resources")]
-        public IActionResult Resources()
+        public async Task<IActionResult> Resources()
         {
-            var resources = _resourceService.GetAllResources();
+            var resources = await _resourceService.GetAllResources();
 
             return Ok(resources);
         }
