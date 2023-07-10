@@ -1,0 +1,195 @@
+﻿@page "/resource-request"
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Mail
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager NavigationManager
+
+<h3>Add Resource Request</h3>
+
+@if (IsRequestSubmitted)
+{
+    <p class="success-message">Your resource request has been sent successfully.</p>
+}
+
+<EditForm Model="this" OnValidSubmit="SubmitRequest">
+    <div class="resource-request-form">
+        <h4>Add Resource Request</h4>
+
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <InputText id="category" class="form-control" @bind-Value="@Category" />
+            <ValidationMessage For="@(() => Category)" />
+        </div>
+
+        <div class="form-group">
+            <label for="type">Type:</label>
+            <InputText id="type" class="form-control" @bind-Value="@Type" />
+            <ValidationMessage For="@(() => Type)" />
+        </div>
+
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <InputText id="title" class="form-control" @bind-Value="@Title" />
+            <ValidationMessage For="@(() => Title)" />
+        </div>
+
+        <div class="form-group">
+            <label for="author">Author:</label>
+            <InputText id="author" class="form-control" @bind-Value="@Author" />
+            <ValidationMessage For="@(() => Author)" />
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <InputTextArea id="description" class="form-control" @bind-Value="@Description" />
+            <ValidationMessage For="@(() => Description)" />
+        </div>
+
+        <div class="form-group">
+            <label for="officialSourceLink">Official Source Link:</label>
+            <InputText id="officialSourceLink" class="form-control" @bind-Value="@OfficialSourceLink" />
+            <ValidationMessage For="@(() => OfficialSourceLink)" />
+        </div>
+
+        <div class="form-group">
+            <label for="priority">Priority:</label>
+            <InputNumber id="priority" class="form-control" @bind-Value="@Priority" />
+            <ValidationMessage For="@(() => Priority)" />
+        </div>
+
+        <div class="form-group">
+            <label for="justification">Justification:</label>
+            <InputTextArea id="justification" class="form-control" @bind-Value="@Justification" />
+            <ValidationMessage For="@(() => Justification)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+        @if (IsFormSubmitted && !IsFormValid)
+        {
+            <p class="validation-message">@ErrorMessage</p>
+        }
+    </div>
+</EditForm>
+
+<style>
+    .resource-request-form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .btn-primary {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .validation-message {
+        color: red;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .success-message {
+        color: green;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+</style>
+
+@code {
+    private string Category { get; set; }
+    private string Type { get; set; }
+    private string Title { get; set; }
+    private string Author { get; set; }
+    private string Description { get; set; }
+    private string OfficialSourceLink { get; set; }
+    private int Priority { get; set; }
+    private string Justification { get; set; }
+
+    private bool IsRequestSubmitted { get; set; } = false;
+    private bool IsFormSubmitted { get; set; } = false;
+    private bool IsFormValid { get; set; } = true;
+    private string ErrorMessage { get; set; }
+
+    private void SubmitRequest()
+    {
+        // Validate the form
+        IsFormSubmitted = true;
+        IsFormValid = ValidateForm();
+
+        if (IsFormValid)
+        {
+            // Save the request with a status of "Pending Review"
+            SaveRequest();
+
+            // Send confirmation emails to the user and admin
+            SendConfirmationEmailToUser();
+            SendConfirmationEmailToAdmin();
+
+            // Set the flag to display success message
+            IsRequestSubmitted = true;
+        }
+        else
+        {
+            ErrorMessage = "Please fill in all the required fields.";
+        }
+    }
+
+    private bool ValidateForm()
+    {
+        var context = new ValidationContext(this, serviceProvider: null, items: null);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(this, context, validationResults, true);
+
+        return validationResults.Count == 0;
+    }
+
+    private void SaveRequest()
+    {
+        // Implement saving the request to a database or any other storage mechanism
+        // Set the request status as "Pending Review" and save the other form data
+        // You can use an ORM, repository pattern, or any other data access method
+    }
+
+    private void SendConfirmationEmailToUser()
+    {
+        // Implement sending a confirmation email to the user
+        // You can use a library like MailKit or System.Net.Mail to send emails
+        // Get the user's email from the form data and compose the email content
+    }
+
+    private void SendConfirmationEmailToAdmin()
+    {
+        // Implement sending a confirmation email to the admin
+        // You can use a library like MailKit or System.Net.Mail to send emails
+        // Get the admin's email or a predefined email and compose the email content
+    }
+}
