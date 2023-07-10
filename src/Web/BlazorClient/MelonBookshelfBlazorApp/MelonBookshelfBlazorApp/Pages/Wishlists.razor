@@ -1,5 +1,7 @@
 ﻿@page "/wishlist"
 @using System.Collections.Generic
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
 
 <h3>Wishlist</h3>
 
@@ -47,10 +49,49 @@
                         {
                             <div class="edit-menu-overlay">
                                 <div class="edit-menu">
-                                    <h4>Edit Options</h4>
-                                    <button class="edit-option" @onclick="() => EditWish(wish)">Edit Option 1</button>
-                                    <button class="edit-option" @onclick="() => EditWish(wish)">Edit Option 2</button>
-                                    <button class="edit-option" @onclick="() => EditWish(wish)">Edit Option 3</button>
+                                    <h4>Edit Wish</h4>
+                                    <EditForm Model="@editedWish" OnValidSubmit="SaveChanges">
+                                        <DataAnnotationsValidator />
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <InputText class="form-control" @bind-Value="@editedWish.Status" required />
+                                            <ValidationMessage For="@(() => editedWish.Status)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Category</label>
+                                            <InputText class="form-control" @bind-Value="@editedWish.Category" required />
+                                            <ValidationMessage For="@(() => editedWish.Category)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Author</label>
+                                            <InputText class="form-control" @bind-Value="@editedWish.Author" required />
+                                            <ValidationMessage For="@(() => editedWish.Author)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Title</label>
+                                            <InputText class="form-control" @bind-Value="@editedWish.Title" required />
+                                            <ValidationMessage For="@(() => editedWish.Title)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Priority</label>
+                                            <InputNumber class="form-control" @bind-Value="@editedWish.Priority" required />
+                                            <ValidationMessage For="@(() => editedWish.Priority)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Date Added</label>
+                                            <InputDate class="form-control" @bind-Value="@editedWish.DateAdded" required />
+                                            <ValidationMessage For="@(() => editedWish.DateAdded)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Upvotes</label>
+                                            <InputNumber class="form-control" @bind-Value="@editedWish.Upvotes" required />
+                                            <ValidationMessage For="@(() => editedWish.Upvotes)" />
+                                        </div>
+                                        <div class="edit-menu-buttons">
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            <button class="cancel-button" @onclick="(e) => ToggleEditMenu(wish)">Cancel</button>
+                                        </div>
+                                    </EditForm>
                                 </div>
                             </div>
                         }
@@ -62,6 +103,59 @@
             }
         </tbody>
     </table>
+
+    <button class="add-wish-button" @onclick="ShowAddWishModal">Add New Wish</button>
+
+    @if (showAddWishModal)
+    {
+        <div class="add-wish-modal-overlay">
+            <div class="add-wish-modal">
+                <h4>Add New Wish</h4>
+                <EditForm Model="@newWish" OnValidSubmit="SaveNewWish">
+                    <DataAnnotationsValidator />
+                    <div class="form-group">
+                        <label>Status</label>
+                        <InputText class="form-control" @bind-Value="@newWish.Status" required />
+                        <ValidationMessage For="@(() => newWish.Status)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <InputText class="form-control" @bind-Value="@newWish.Category" required />
+                        <ValidationMessage For="@(() => newWish.Category)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Author</label>
+                        <InputText class="form-control" @bind-Value="@newWish.Author" required />
+                        <ValidationMessage For="@(() => newWish.Author)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <InputText class="form-control" @bind-Value="@newWish.Title" required />
+                        <ValidationMessage For="@(() => newWish.Title)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <InputNumber class="form-control" @bind-Value="@newWish.Priority" required />
+                        <ValidationMessage For="@(() => newWish.Priority)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Date Added</label>
+                        <InputDate class="form-control" @bind-Value="@newWish.DateAdded" required />
+                        <ValidationMessage For="@(() => newWish.DateAdded)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Upvotes</label>
+                        <InputNumber class="form-control" @bind-Value="@newWish.Upvotes" required />
+                        <ValidationMessage For="@(() => newWish.Upvotes)" />
+                    </div>
+                    <div class="edit-menu-buttons">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button class="cancel-button" @onclick="HideAddWishModal">Cancel</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
 }
 else
 {
@@ -69,33 +163,13 @@ else
 }
 
 <style>
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
+    /* Styles for table, buttons, etc. */
+    .upvote-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
     }
-
-        .table th,
-        .table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-
-        .table td:first-child {
-            font-weight: bold;
-        }
-
-    p {
-        margin-top: 20px;
-        font-style: italic;
-    }
-
     .upvote-button {
         background-color: #007bff;
         color: #fff;
@@ -105,9 +179,9 @@ else
         cursor: pointer;
     }
 
-        .upvote-button.upvoted {
-            background-color: #28a745;
-        }
+    .upvote-button.upvoted {
+        background-color: #28a745;
+    }
 
     .edit-button {
         background-color: #ffc107;
@@ -116,6 +190,34 @@ else
         border: none;
         border-radius: 4px;
         cursor: pointer;
+    }
+
+    .cancel-button {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-button {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .add-wish-button {
+        background-color: #28a745;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
     }
 
     .edit-menu-overlay {
@@ -135,26 +237,20 @@ else
         background-color: #fff;
         padding: 20px;
         border-radius: 4px;
+        width: 400px;
     }
 
-        .edit-menu h4 {
-            text-align: center;
-        }
-
-    .edit-option {
-        display: block;
-        padding: 6px 12px;
-        background-color: #fff;
-        color: #000;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 4px;
-        width: 100%;
-        text-align: left;
+    .form-group {
+        margin-bottom: 20px;
     }
 
-    .delete-button {
+    .edit-menu-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .cancel-button {
         background-color: #dc3545;
         color: #fff;
         padding: 6px 12px;
@@ -162,12 +258,35 @@ else
         border-radius: 4px;
         cursor: pointer;
     }
+
+    .add-wish-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .add-wish-modal {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 4px;
+        width: 400px;
+    }
 </style>
 
 @code {
     private List<Wish> Wishlist { get; set; }
     private bool showEditMenu = false;
     private Wish selectedWish;
+    private Wish editedWish;
+    private bool showAddWishModal = false;
+    private Wish newWish = new Wish();
 
     protected override void OnInitialized()
     {
@@ -211,19 +330,53 @@ else
     {
         showEditMenu = !showEditMenu;
         selectedWish = wish;
+
+        if (showEditMenu)
+        {
+            editedWish = new Wish
+            {
+                Status = selectedWish.Status,
+                Category = selectedWish.Category,
+                Author = selectedWish.Author,
+                Title = selectedWish.Title,
+                Priority = selectedWish.Priority,
+                DateAdded = selectedWish.DateAdded,
+                Upvotes = selectedWish.Upvotes
+            };
+        }
+        else
+        {
+            editedWish = null;
+        }
     }
 
-    private void EditWish(Wish wish)
+    private void SaveChanges()
     {
-        // Handle editing the wish here
-        // You can navigate to an edit page or show an edit form/modal
-        // Example: NavigationManager.NavigateTo($"/edit-wish/{wish.Id}");
+        var index = Wishlist.FindIndex(w => w == selectedWish);
+        Wishlist[index] = editedWish;
+        ToggleEditMenu(selectedWish);
     }
 
     private void DeleteWish(Wish wish)
     {
-        // Handle deleting the wish here
-        // Example: Wishlist.Remove(wish);
+        Wishlist.Remove(wish);
+    }
+
+    private void ShowAddWishModal()
+    {
+        showAddWishModal = true;
+    }
+
+    private void HideAddWishModal()
+    {
+        showAddWishModal = false;
+    }
+
+    private void SaveNewWish()
+    {
+        Wishlist.Add(newWish);
+        newWish = new Wish(); // Reset newWish object
+        HideAddWishModal();
     }
 
     public class Wish

@@ -7,7 +7,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Configuration.AddJsonFile("api-endpoints.json");
+//builder.Configuration.AddJsonFile("api-endpoints.json");
 
 var authentication = builder.Configuration.GetSection("ApiEndpoints").Get<Authentication>();
 var baseUserActions = builder.Configuration.GetSection("ApiEndpoints").Get<BaseUserActions>();
