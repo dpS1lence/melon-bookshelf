@@ -1,56 +1,100 @@
 ﻿@page "/resource-search"
 @using System.Collections.Generic
-@using System.Web
+@using System.Linq
 @inject NavigationManager NavigationManager
-
 
 <h3>Resource Search</h3>
 
-<div class="search-form">
-    <div class="form-group">
-        <label for="resourceType">Type:</label>
-        <select id="resourceType" class="form-control" @bind="@SelectedType">
-            <option value="">All</option>
-            <option value="Type1">Type1</option>
-            <option value="Type2">Type2</option>
-            <option value="Type3">Type3</option>
-        </select>
-    </div>
+<div class="search-bar">
+    <div class="search-form">
+        <div class="form-group">
+            <label for="resourceType">Type:</label>
+            <select id="resourceType" class="form-control" @bind="@SelectedType">
+                <option value="">All</option>
+                <option value="Type1">Type1</option>
+                <option value="Type2">Type2</option>
+                <option value="Type3">Type3</option>
+            </select>
+        </div>
 
- <div class="form-group">
-    <label for="category">Category:</label>
-    <select id="category" class="form-control" @bind="@SelectedCategory">
-        <option value="">All</option>
-        @foreach (var category in Categories)
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" class="form-control" @bind="@SelectedCategory">
+                <option value="">All</option>
+                @foreach (var category in Categories)
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" class="form-control" @bind="@Title" />
+        </div>
+
+        <div class="form-group">
+            <button type="button" class="btn btn-primary" @onclick="Search">Search</button>
+            <button type="button" class="btn btn-secondary" @onclick="Reset">Reset</button>
+        </div>
+    </div>
+</div>
+
+@if (SearchPerformed && (SearchResults == null || !SearchResults.Any()))
+{
+    <p>No results found.</p>
+}
+
+<h4>Search Results:</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Title</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (SearchPerformed && SearchResults != null)
         {
-            <option value="@category">@category</option>
+            foreach (var result in SearchResults)
+            {
+                <tr>
+                    <td>@result.Type</td>
+                    <td>@result.Category</td>
+                    <td>@result.Title</td>
+                </tr>
+            }
         }
-    </select>
-</div>
-
-    <div class="form-group">
-        <label for="title">Title:</label>
-        <input type="text" id="title" class="form-control" @bind="@Title" />
-    </div>
-
-    <div class="form-group">
-        <button type="button" class="btn btn-primary" @onclick="Search">Search</button>
-        <button type="button" class="btn btn-secondary" @onclick="Reset">Reset</button>
-    </div>
-</div>
-
+        else if (!SearchPerformed && Resources != null)
+        {
+            foreach (var resource in Resources)
+            {
+                <tr>
+                    <td>@resource.Type</td>
+                    <td>@resource.Category</td>
+                    <td>@resource.Title</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
 <style>
-    .search-form {
-        max-width: 400px;
-        margin: 0 auto;
+    .search-bar {
+        background-color: #f5f5f5;
         padding: 20px;
-        border: 1px solid #ccc;
         border-radius: 4px;
-        background-color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 20px;
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 0;
     }
 
     label {
@@ -58,7 +102,7 @@
     }
 
     .form-control {
-        width: 100%;
+        width: 200px;
         padding: 8px;
         font-size: 16px;
         border-radius: 4px;
@@ -68,6 +112,26 @@
     .btn-primary {
         margin-right: 10px;
     }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
 </style>
 
 @code {
@@ -75,69 +139,65 @@
     private string SelectedCategory { get; set; }
     private string Title { get; set; }
 
-    private string TypeFilter { get; set; }
-    private string CategoryFilter { get; set; }
-    private string TitleFilter { get; set; }
+    private List<Resource> Resources { get; set; }
+
+    private bool SearchPerformed { get; set; }
+    private List<Resource> SearchResults { get; set; }
+
+    private List<string> Categories { get; set; } = new List<string>
+    {
+        "Category 1",
+        "Category 2",
+        "Category 3"
+    };
+
+    protected override void OnInitialized()
+    {
+        // Simulate retrieving resources from your project
+        // Replace this with your actual logic to fetch resources from your data source
+        Resources = GetResources();
+    }
+
+    private List<Resource> GetResources()
+    {
+        // Implement your logic to fetch resources from your data source
+        // Return a list of resources
+        return new List<Resource>
+        {
+            new Resource { Type = "Type1", Category = "Category 1", Title = "Resource 1" },
+            new Resource { Type = "Type2", Category = "Category 1", Title = "Resource 2" },
+            new Resource { Type = "Type1", Category = "Category 2", Title = "Resource 3" },
+            new Resource { Type = "Type3", Category = "Category 3", Title = "Resource 4" },
+            new Resource { Type = "Type2", Category = "Category 2", Title = "Resource 5" },
+        };
+    }
 
     private void Search()
     {
-        var queryString = ConstructQueryString();
+        // Perform the search logic and populate the SearchResults list
+        // Replace this with your actual search implementation
+        SearchResults = Resources.Where(r =>
+            (string.IsNullOrEmpty(SelectedType) || r.Type == SelectedType) &&
+            (string.IsNullOrEmpty(SelectedCategory) || r.Category == SelectedCategory) &&
+            (string.IsNullOrEmpty(Title) || r.Title.Contains(Title, StringComparison.OrdinalIgnoreCase))
+        ).ToList();
 
-        NavigationManager.NavigateTo($"/search-results{queryString}");
-    }
-
-    private string ConstructQueryString()
-    {
-        var parameters = new Dictionary<string, string>();
-        if (!string.IsNullOrEmpty(TypeFilter))
-        {
-            parameters["type"] = HttpUtility.UrlEncode(TypeFilter);
-        }
-        if (!string.IsNullOrEmpty(CategoryFilter))
-        {
-            parameters["category"] = HttpUtility.UrlEncode(CategoryFilter);
-        }
-        if (!string.IsNullOrEmpty(TitleFilter))
-        {
-            parameters["title"] = HttpUtility.UrlEncode(TitleFilter);
-        }
-
-        var queryString = string.Join("&", parameters.Select(p => $"{p.Key}={p.Value}"));
-
-        if (!string.IsNullOrEmpty(queryString))
-        {
-            queryString = "?" + queryString;
-        }
-
-        return queryString;
+        SearchPerformed = true;
     }
 
     private void Reset()
     {
-        // Reset the search filters
-        TypeFilter = "";
-        CategoryFilter = "";
-        TitleFilter = "";
-    }
-     private List<string> Categories { get; set; } = new List<string>();
-
-    protected override void OnInitialized()
-    {
-        // Simulate retrieving categories from your project
-        // Replace this with your actual logic to fetch categories from your data source
-        Categories = GetCategories();
+        SelectedType = "";
+        SelectedCategory = "";
+        Title = "";
+        SearchPerformed = false;
+        SearchResults = null;
     }
 
-    private List<string> GetCategories()
+    public class Resource
     {
-        // Implement your logic to fetch categories from your data source
-        // Return a list of categories
-        return new List<string>
-        {
-            "Category1",
-            "Category2",
-            "Category3"
-        };
+        public string Type { get; set; }
+        public string Category { get; set; }
+        public string Title { get; set; }
     }
 }
-
