@@ -83,19 +83,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		string? token = await _auth.GetToken();
-
-		if (string.IsNullOrEmpty(token))
-		{
-			noToken = true;
-		}
-
-		isAdmin = AuthenticationService.IsUserAdmin(token);
-
-		if (isAdmin)
-		{
-			StateHasChanged();
-		}
+		await CheckUserStatus();
 	}
 
 	private bool collapseNavMenu = true;
@@ -107,6 +95,9 @@
 		collapseNavMenu = !collapseNavMenu;
 	}
 
+	[Parameter]
+	public EventCallback OnLogout { get; set; }
+
 	private void Logout()
 	{
 		_auth.RemoveToken();
@@ -115,6 +106,13 @@
 
 		_navigationManager.NavigateTo("/login");
 
-		StateHasChanged();
+		OnLogout.InvokeAsync();
+	}
+
+	private async Task CheckUserStatus()
+	{
+		string? token = await _auth.GetToken();
+		noToken = string.IsNullOrEmpty(token);
+		isAdmin = AuthenticationService.IsUserAdmin(token);
 	}
 }

@@ -51,9 +51,7 @@ namespace MelonBookshelfBlazorApp.Services
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
 
-            var roleClaims = jwtToken.Claims.Where(c => c.Type == ClaimTypes.Role);
-
-            return roleClaims.Any(c => c.Value == "Admin");
+            return jwtToken.Claims.Any(c => c.Value == "Admin");
         }
 
         public void RemoveToken()
