@@ -38,6 +38,7 @@ builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IHrActionsService, HrActionsService>();
 builder.Services.AddScoped<IBaseUserAutomationService, BaseUserAutomationService>();
+builder.Services.AddScoped<IMessageSender, EmailSender>();
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<MappingProfiles>();
@@ -53,8 +54,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-
-
 var swaggerSettings = builder.Configuration.GetSection("Swagger").Get<SwaggerSettings>();
 
 builder.Services.AddSwagger(p =>
@@ -67,6 +66,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger(swaggerSettings);
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    Initializer.Initialize(scope.ServiceProvider);
 }
 
 app.UseHttpsRedirection();

@@ -7,7 +7,7 @@ namespace MelonBookshelfApi.Controllers.HR
 {
     [ApiController]
     [Route("api")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class HRActionsController : Controller
     {
         private readonly IHrActionsService _automationService;

@@ -1,6 +1,10 @@
 ﻿@page "/register"
 @using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
+@using Newtonsoft.Json;
+@using System.Text;
 @inject NavigationManager NavigationManager
+@inject AuthenticationFetcher _auth
 
 <PageTitle>Register</PageTitle>
 
@@ -37,7 +41,7 @@
 
     <div class="login-register-container">
         <button type="button" class="btn btn-login" @onclick="GoToLoginPage">Login</button>
-        <button type="button" class="btn btn-register" @onclick="Registers">Register</button>
+        <button type="button" class="btn btn-register" @onclick="RegisterAction">Register</button>
     </div>
 
 </div>
@@ -45,12 +49,20 @@
 @code {
     RegisterModel model = new RegisterModel();
 
-    private void Registers()
+    private async Task RegisterAction()
     {
-        // Perform user registration logic here
-        // Example: validate input, create user, store user in database, etc.
+        var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
 
-        // You can handle the registration success/failure as per your requirements
+        var response = await _auth.Register(jsonContent);
+
+        if (response == "Bad request")
+        {
+            
+        }
+        else
+        {
+            GoToLoginPage();
+        }
     }
 
     private void GoToLoginPage()

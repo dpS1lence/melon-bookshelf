@@ -8,6 +8,29 @@
         public string Password { get; set; } = default!;
         public string ConfirmPassword { get; set; } = default!;
 
-        //public 
+        public bool ValidateRegistration()
+        {
+            if(IsNullOrDefaultOrEmmpty(new List<string>() { FirstName, LastName, Email, Password, ConfirmPassword }))
+            {
+                return false;
+            }
+
+            if(Password != ConfirmPassword) 
+            {
+                return false; 
+            }
+
+            return true;
+        }
+
+        private static bool IsNullOrDefaultOrEmmpty(List<string> strings)
+        {
+            foreach(string s in strings)
+            {
+                if (string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s) || s == default) return false;
+            }
+
+            return true;
+        }
     }
 }

@@ -12,12 +12,13 @@ namespace MelonBookshelfApi.Services
         private readonly IRepository _repository;
         private readonly ILogger _logger;
         private readonly UserManager<IdentityUser> _userManager;
-
-        public BaseUserAutomationService(IRepository repository, ILogger<BaseUserAutomationService> logger, UserManager<IdentityUser> userManager)
+        private readonly IMessageSender _messageSender;
+        public BaseUserAutomationService(IRepository repository, ILogger<BaseUserAutomationService> logger, UserManager<IdentityUser> userManager, IMessageSender messageSender)
         {
             _repository = repository;
             _logger = logger;
             _userManager = userManager;
+            _messageSender = messageSender;
         }
 
         public async Task FollowRequest(int requestId, string userId)
@@ -82,6 +83,8 @@ namespace MelonBookshelfApi.Services
 
             resource.Status = ResourceStatus.Avalable.ToString();
 
+            await _messageSender.SendMessage(user.Email, $"Resource Returned - You have successfully returned {resource.Title}!");
+
             _repository.Update(resource);
             await _repository.DeleteAsync<UserResource>(userResource);
             await _repository.SaveChangesAsync();
@@ -109,6 +112,8 @@ namespace MelonBookshelfApi.Services
             };
 
             resource.Status = ResourceStatus.Taken.ToString();
+
+            await _messageSender.SendMessage(user.Email, $"Resource Taken - You have successfully taken {resource.Title}!");
 
             _repository.Update(resource);
             await _repository.AddAsync(userResource);

@@ -5,6 +5,7 @@
 @using MelonBookshelfBlazorApp.Services;
 @using Newtonsoft.Json;
 @using System.Text;
+@inject NavigationManager _navigationManager
 @inject AuthenticationFetcher _authenticationFetcher
 @inject AuthenticationService _authenticationService
 
@@ -28,15 +29,23 @@
 
 @code {
     private LoginModel loginModel = new LoginModel();
-    private LoginResult? loginResult = null;
 
     private async Task HandleLogin()
     {
         var jsonContent = new StringContent(JsonConvert.SerializeObject(loginModel), Encoding.UTF8, "application/json");
 
         var response = await _authenticationFetcher.Login(jsonContent);
-        loginResult = JsonConvert.DeserializeObject<LoginResult>(response);
-        
-        _authenticationService.SetBearerToken(loginResult.Token);
+        var loginResult = JsonConvert.DeserializeObject<LoginResult>(response);
+
+        if(loginResult == null || string.IsNullOrEmpty(loginResult.Token))
+        {
+            
+        }
+        else
+        {
+            _authenticationService.SetBearerToken(loginResult.Token);
+
+            _navigationManager.NavigateTo("/home");
+        }
     }
 }

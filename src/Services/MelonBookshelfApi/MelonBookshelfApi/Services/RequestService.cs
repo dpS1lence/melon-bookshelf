@@ -10,6 +10,7 @@ using MelonBookshelfApi.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Cmp;
 
 namespace MelonBookshelfApi.Services
 {
@@ -19,13 +20,15 @@ namespace MelonBookshelfApi.Services
         private readonly ILogger _logger;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly IMessageSender _messageSender;
 
-        public RequestService(IRepository repository, ILogger<RequestService> logger, UserManager<IdentityUser> userManager, IMapper mapper)
+        public RequestService(IMessageSender messageSender, IRepository repository, ILogger<RequestService> logger, UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
             _userManager = userManager;
             _mapper = mapper;
+            _messageSender = messageSender;
         }
 
         public async Task<ResourceRequestDto> GetRequestById(int requestId)
@@ -139,8 +142,7 @@ namespace MelonBookshelfApi.Services
             await _repository.AddAsync(resourceRequest);
             await _repository.SaveChangesAsync();
 
-            //SendConfirmationEmailToUser(resourceRequest);
-            //SendConfirmationEmailToAdmin(resourceRequest);
+            await _messageSender.SendMessage(user.Email, $"Request Approved - Your request for {resourceRequest.Title} has been approved!");
 
             return new ProcessRequestResult { ProcessRequest = ProcessRequest.RequestProcessedSuccessfuly };
         }

@@ -5,7 +5,7 @@ namespace MelonBookshelfApi.ApplicationExtentions
 {
     public static class Initializer
     {
-        public static void Initialize(this IServiceProvider serviceProvider)
+        public static void Initialize(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<BookshelfDbContext>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();

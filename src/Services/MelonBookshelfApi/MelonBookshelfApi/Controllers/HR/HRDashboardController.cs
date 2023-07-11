@@ -8,7 +8,7 @@ namespace MelonBookshelfApi.Controllers.HR
 {
     [ApiController]
     [Route("api")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class HRDashboardController : Controller
     {
         private readonly ILogger _logger;

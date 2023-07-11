@@ -1,5 +1,7 @@
-﻿using MelonBookshelfApi.RequestDtos;
+﻿using MelonBookchelfApi.Infrastructure.Data.Models;
+using MelonBookshelfApi.RequestDtos;
 using MelonBookshelfApi.Services;
+using MelonBookshelfApi.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +16,14 @@ namespace MelonBookshelfApi.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly IMessageSender _messageSender;
 
-        public AuthenticationController(UserManager<IdentityUser> userManager, ILogger<AuthenticationController> logger, IConfiguration configuration)
+        public AuthenticationController(IMessageSender messageSender, UserManager<IdentityUser> userManager, ILogger<AuthenticationController> logger, IConfiguration configuration)
         {
             _userManager = userManager;
             _logger = logger;
             _configuration = configuration;
+            _messageSender = messageSender;
         }
 
         [HttpPost]
@@ -34,6 +38,9 @@ namespace MelonBookshelfApi.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation("User registered successfully.");
+
+                await _messageSender.SendMessage(user.Email, $"Registration - You have successfully registered!");
+
                 return Ok();
             }
 
@@ -60,7 +67,7 @@ namespace MelonBookshelfApi.Controllers
             {
                 _logger.LogInformation("User login successful. Generating JWT token.");
 
-                string token = JwtTokenGenerator.GenerateToken(_configuration, user);
+                string token = await JwtTokenGenerator.GenerateToken(_configuration, user, _userManager);
 
                 _logger.LogInformation("JWT token generated successfully.");
                 return Ok(new { Token = token });
