@@ -1,7 +1,6 @@
-﻿using MelonBookshelfApi.Services.Contracts;
+﻿using MailKit.Net.Smtp;
+using MelonBookshelfApi.Services.Contracts;
 using MimeKit;
-using System.Net;
-using System.Net.Mail;
 
 namespace MelonBookshelfApi.Services
 {
@@ -14,19 +13,24 @@ namespace MelonBookshelfApi.Services
         }
         public async Task SendMessage(string to, string content)
         {
-            var mail = new MailMessage();
-            var SmtpServer = new SmtpClient("smtp.gmail.com");
+			var message = new MimeMessage();
+			message.From.Add(new MailboxAddress("Melon Bookshelf", "melonbookshelf@gmail.com"));
+			message.To.Add(new MailboxAddress("", to));
+			message.Subject = content.Split()[0];
 
-            mail.From = new MailAddress("melonbookshelf@gmail.com");
-            mail.To.Add(to);
-            mail.Subject = content.Split()[0];
-            mail.Body = content;
+			message.Body = new TextPart("plain")
+			{
+				Text = content
+			};
 
-            SmtpServer.Port = 465;
-            SmtpServer.Credentials = new NetworkCredential("davidpetkov2006@gmail.com", "rmwsxzhaikdjxusa");
-            SmtpServer.EnableSsl = true;
+			using var client = new SmtpClient();
 
-            await SmtpServer.SendMailAsync(mail);
-        }
+			await client.ConnectAsync("smtp.gmail.com", 465, true);
+
+			await client.AuthenticateAsync("davidpetkov2006@gmail.com", "rmwsxzhaikdjxusa");
+
+			await client.SendAsync(message);
+			await client.DisconnectAsync(true);
+		}
     }
 }
