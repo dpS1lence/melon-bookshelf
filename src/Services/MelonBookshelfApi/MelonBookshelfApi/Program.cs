@@ -13,7 +13,7 @@ using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DockerConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<BookshelfDbContext>(options =>
     options.UseSqlServer(connectionString)
 );
@@ -51,6 +51,11 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
+
+        builder.WithOrigins("https://localhost")
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials();
     });
 });
 
@@ -68,10 +73,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(swaggerSettings);
 }
 
-using (var scope = app.Services.CreateScope())
+/*using (var scope = app.Services.CreateScope())
 {
     Initializer.Initialize(scope.ServiceProvider);
-}
+}*/
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

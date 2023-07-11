@@ -1,11 +1,11 @@
-﻿@page "/wishlist"
+﻿@page "/requests"
 @using System.Collections.Generic
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
 
-<h3>Wishlist</h3>
+<h3>Requests</h3>
 
-@if (Wishlist != null && Wishlist.Any())
+@if (Requests != null && Requests.Any())
 {
     <table class="table">
         <thead>
@@ -23,159 +23,162 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var wish in Wishlist)
+            @foreach (var request in Requests)
             {
                 <tr>
-                    <td>@wish.Status</td>
-                    <td>@wish.Category</td>
-                    <td>@wish.Author</td>
-                    <td>@wish.Title</td>
-                    <td>@wish.Priority</td>
-                    <td>@wish.DateAdded.ToShortDateString()</td>
-                    <td>@wish.Upvotes</td>
+                    <td>@request.Status</td>
+                    <td>@request.Category</td>
+                    <td>@request.Author</td>
+                    <td>@request.Title</td>
+                    <td>@request.Priority</td>
+                    <td>@request.DateAdded.ToShortDateString()</td>
+                    <td>@request.Upvotes</td>
                     <td>
-                        @if (!wish.IsUpvoted)
-                        {
-                            <button class="upvote-button" @onclick="() => UpvoteWish(wish)">Upvote</button>
-                        }
-                        else
-                        {
-                            <button class="upvote-button upvoted" disabled>Upvoted</button>
-                        }
+                        <button class="upvote-button @(request.IsUpvoted ? "upvoted" : "")" @onclick="() => UpvoteRequest(request)">Upvote</button>
                     </td>
                     <td>
-                        <button class="edit-button" @onclick="() => ToggleEditMenu(wish)">Edit</button>
-                        @if (showEditMenu && selectedWish == wish)
+                        <button class="like-button @(request.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(request)">
+                            Like
+                        </button>
+
+                    </td>
+                    <td>
+                        <button class="delete-button" @onclick="() => DeleteRequest(request)">Delete</button>
+                    </td>
+                    <td>
+                        <button class="edit-button" @onclick="() => ToggleEditMenu(request)">Edit</button>
+                        @if (showEditMenu && selectedRequest == request)
                         {
                             <div class="edit-menu-overlay">
                                 <div class="edit-menu">
-                                    <h4>Edit Wish</h4>
-                                    <EditForm Model="@editedWish" OnValidSubmit="SaveChanges">
+                                    <h4>Edit Request</h4>
+                                    <EditForm Model="@editedRequest" OnValidSubmit="SaveChanges">
                                         <DataAnnotationsValidator />
                                         <div class="form-group">
                                             <label>Status</label>
-                                            <InputText class="form-control" @bind-Value="@editedWish.Status" required />
-                                            <ValidationMessage For="@(() => editedWish.Status)" />
+                                            <InputText class="form-control" @bind-Value="@editedRequest.Status" required />
+                                            <ValidationMessage For="@(() => editedRequest.Status)" />
                                         </div>
                                         <div class="form-group">
                                             <label>Category</label>
-                                            <InputText class="form-control" @bind-Value="@editedWish.Category" required />
-                                            <ValidationMessage For="@(() => editedWish.Category)" />
+                                            <InputText class="form-control" @bind-Value="@editedRequest.Category" required />
+                                            <ValidationMessage For="@(() => editedRequest.Category)" />
                                         </div>
                                         <div class="form-group">
                                             <label>Author</label>
-                                            <InputText class="form-control" @bind-Value="@editedWish.Author" required />
-                                            <ValidationMessage For="@(() => editedWish.Author)" />
+                                            <InputText class="form-control" @bind-Value="@editedRequest.Author" required />
+                                            <ValidationMessage For="@(() => editedRequest.Author)" />
                                         </div>
                                         <div class="form-group">
                                             <label>Title</label>
-                                            <InputText class="form-control" @bind-Value="@editedWish.Title" required />
-                                            <ValidationMessage For="@(() => editedWish.Title)" />
+                                            <InputText class="form-control" @bind-Value="@editedRequest.Title" required />
+                                            <ValidationMessage For="@(() => editedRequest.Title)" />
                                         </div>
                                         <div class="form-group">
                                             <label>Priority</label>
-                                            <InputNumber class="form-control" @bind-Value="@editedWish.Priority" required />
-                                            <ValidationMessage For="@(() => editedWish.Priority)" />
+                                            <InputNumber class="form-control" @bind-Value="@editedRequest.Priority" required />
+                                            <ValidationMessage For="@(() => editedRequest.Priority)" />
                                         </div>
                                         <div class="form-group">
                                             <label>Date Added</label>
-                                            <InputDate class="form-control" @bind-Value="@editedWish.DateAdded" required />
-                                            <ValidationMessage For="@(() => editedWish.DateAdded)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Upvotes</label>
-                                            <InputNumber class="form-control" @bind-Value="@editedWish.Upvotes" required />
-                                            <ValidationMessage For="@(() => editedWish.Upvotes)" />
+                                            <InputDate class="form-control" @bind-Value="@editedRequest.DateAdded" required />
+                                            <ValidationMessage For="@(() => editedRequest.DateAdded)" />
                                         </div>
                                         <div class="edit-menu-buttons">
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
-                                            <button class="cancel-button" @onclick="(e) => ToggleEditMenu(wish)">Cancel</button>
+                                            <button class="cancel-button" @onclick="(e) => ToggleEditMenu(request)">Cancel</button>
                                         </div>
                                     </EditForm>
                                 </div>
                             </div>
                         }
                     </td>
-                    <td>
-                        <button class="delete-button" @onclick="() => DeleteWish(wish)">Delete</button>
-                    </td>
                 </tr>
             }
         </tbody>
     </table>
 
-    <button class="add-wish-button" @onclick="ShowAddWishModal">Add New Wish</button>
+    <button class="add-request-button" @onclick="ShowAddRequestModal">Add New Request</button>
 
-    @if (showAddWishModal)
+    @if (showAddRequestModal)
     {
-        <div class="add-wish-modal-overlay">
-            <div class="add-wish-modal">
-                <h4>Add New Wish</h4>
-                <EditForm Model="@newWish" OnValidSubmit="SaveNewWish">
-                    <DataAnnotationsValidator />
-                    <div class="form-group">
-                        <label>Status</label>
-                        <InputText class="form-control" @bind-Value="@newWish.Status" required />
-                        <ValidationMessage For="@(() => newWish.Status)" />
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <InputText class="form-control" @bind-Value="@newWish.Category" required />
-                        <ValidationMessage For="@(() => newWish.Category)" />
-                    </div>
-                    <div class="form-group">
-                        <label>Author</label>
-                        <InputText class="form-control" @bind-Value="@newWish.Author" required />
-                        <ValidationMessage For="@(() => newWish.Author)" />
-                    </div>
-                    <div class="form-group">
-                        <label>Title</label>
-                        <InputText class="form-control" @bind-Value="@newWish.Title" required />
-                        <ValidationMessage For="@(() => newWish.Title)" />
-                    </div>
-                    <div class="form-group">
-                        <label>Priority</label>
-                        <InputNumber class="form-control" @bind-Value="@newWish.Priority" required />
-                        <ValidationMessage For="@(() => newWish.Priority)" />
-                    </div>
-                    <div class="form-group">
-                        <label>Date Added</label>
-                        <InputDate class="form-control" @bind-Value="@newWish.DateAdded" required />
-                        <ValidationMessage For="@(() => newWish.DateAdded)" />
-                    </div>
-                    <div class="form-group">
-                        <label>Upvotes</label>
-                        <InputNumber class="form-control" @bind-Value="@newWish.Upvotes" required />
-                        <ValidationMessage For="@(() => newWish.Upvotes)" />
-                    </div>
-                    <div class="edit-menu-buttons">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button class="cancel-button" @onclick="HideAddWishModal">Cancel</button>
-                    </div>
-                </EditForm>
+        @if (showAddRequestModal)
+        {
+            <div class="add-request-modal-overlay">
+                <div class="add-request-modal">
+                    <h4>Add New Request</h4>
+                    <EditForm Model="@newRequest" OnValidSubmit="SaveNewRequest">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>Category</label>
+                            <InputText class="form-control" @bind-Value="@newRequest.Category" required />
+                            <ValidationMessage For="@(() => newRequest.Category)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <InputText class="form-control" @bind-Value="@newRequest.Type" required />
+                            <ValidationMessage For="@(() => newRequest.Type)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <InputText class="form-control" @bind-Value="@newRequest.Title" required />
+                            <ValidationMessage For="@(() => newRequest.Title)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Author</label>
+                            <InputText class="form-control" @bind-Value="@newRequest.Author" required />
+                            <ValidationMessage For="@(() => newRequest.Author)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <InputTextArea class="form-control" @bind-Value="@newRequest.Description" required />
+                            <ValidationMessage For="@(() => newRequest.Description)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Official Source Link</label>
+                            <InputText class="form-control" @bind-Value="@newRequest.OfficialSourceLink" required />
+                            <ValidationMessage For="@(() => newRequest.OfficialSourceLink)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Priority</label>
+                            <InputNumber class="form-control" @bind-Value="@newRequest.Priority" required />
+                            <ValidationMessage For="@(() => newRequest.Priority)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Justification</label>
+                            <InputTextArea class="form-control" @bind-Value="@newRequest.Justification" required />
+                            <ValidationMessage For="@(() => newRequest.Justification)" />
+                        </div>
+                        <div class="edit-menu-buttons">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button class="cancel-button" @onclick="HideAddRequestModal">Cancel</button>
+                        </div>
+                    </EditForm>
+                </div>
             </div>
-        </div>
+        }
+
     }
 }
 else
 {
-    <p>No wishes found.</p>
+    <p>No requests found.</p>
 }
 
 @code {
-    private List<Wish> Wishlist { get; set; }
+    private List<Request> Requests { get; set; }
     private bool showEditMenu = false;
-    private Wish selectedWish;
-    private Wish editedWish;
-    private bool showAddWishModal = false;
-    private Wish newWish = new Wish();
+    private Request selectedRequest;
+    private Request editedRequest;
+    private bool showAddRequestModal = false;
+    private Request newRequest = new Request();
 
     protected override void OnInitialized()
     {
-        // Simulate fetching wishlist resources
-        Wishlist = new List<Wish>
+        // Simulate fetching request resources
+        Requests = new List<Request>
         {
-            new Wish
+            new Request
             {
                 Status = "In Progress",
                 Category = "Category 1",
@@ -183,9 +186,10 @@ else
                 Title = "Title 1",
                 Priority = 1,
                 DateAdded = DateTime.Now.AddDays(-7),
-                Upvotes = 10
+                Upvotes = 10,
+                Likes = 5
             },
-            new Wish
+            new Request
             {
                 Status = "Not Started",
                 Category = "Category 2",
@@ -193,83 +197,102 @@ else
                 Title = "Title 2",
                 Priority = 2,
                 DateAdded = DateTime.Now.AddDays(-14),
-                Upvotes = 5
+                Upvotes = 5,
+                Likes = 2
             },
-            // Add more wishlist resources as needed
+            // Add more request resources as needed
         };
     }
 
-    private void UpvoteWish(Wish wish)
+    private void UpvoteRequest(Request request)
     {
-        if (!wish.IsUpvoted)
+        if (!request.IsUpvoted)
         {
-            wish.Upvotes++;
-            wish.IsUpvoted = true;
+            request.Upvotes++;
+            request.IsUpvoted = true;
         }
     }
 
-    private void ToggleEditMenu(Wish wish)
+    private void LikeRequest(Request request)
+    {
+        request.Likes++;
+    }
+
+    private void ToggleEditMenu(Request request)
     {
         showEditMenu = !showEditMenu;
-        selectedWish = wish;
+        selectedRequest = request;
 
         if (showEditMenu)
         {
-            editedWish = new Wish
-            {
-                Status = selectedWish.Status,
-                Category = selectedWish.Category,
-                Author = selectedWish.Author,
-                Title = selectedWish.Title,
-                Priority = selectedWish.Priority,
-                DateAdded = selectedWish.DateAdded,
-                Upvotes = selectedWish.Upvotes
-            };
+            editedRequest = new Request
+                {
+                    Status = selectedRequest.Status,
+                    Category = selectedRequest.Category,
+                    Author = selectedRequest.Author,
+                    Title = selectedRequest.Title,
+                    Priority = selectedRequest.Priority,
+                    DateAdded = selectedRequest.DateAdded,
+                    Upvotes = selectedRequest.Upvotes,
+                    Likes = selectedRequest.Likes,
+                    IsUpvoted = selectedRequest.IsUpvoted
+                };
         }
         else
         {
-            editedWish = null;
+            editedRequest = null;
         }
     }
 
     private void SaveChanges()
     {
-        var index = Wishlist.FindIndex(w => w == selectedWish);
-        Wishlist[index] = editedWish;
-        ToggleEditMenu(selectedWish);
+        var index = Requests.FindIndex(r => r == selectedRequest);
+        Requests[index] = editedRequest;
+        ToggleEditMenu(selectedRequest);
     }
 
-    private void DeleteWish(Wish wish)
+    private void DeleteRequest(Request request)
     {
-        Wishlist.Remove(wish);
+        Requests.Remove(request);
     }
 
-    private void ShowAddWishModal()
+    private void ShowAddRequestModal()
     {
-        showAddWishModal = true;
+        showAddRequestModal = true;
     }
 
-    private void HideAddWishModal()
+    private void HideAddRequestModal()
     {
-        showAddWishModal = false;
+        showAddRequestModal = false;
     }
 
-    private void SaveNewWish()
+    private void SaveNewRequest()
     {
-        Wishlist.Add(newWish);
-        newWish = new Wish(); // Reset newWish object
-        HideAddWishModal();
+        Requests.Add(newRequest);
+        newRequest = new Request(); // Reset newRequest object
+        HideAddRequestModal();
+    }
+    private void ToggleLike(Request request)
+    {
+        request.IsLiked = !request.IsLiked;
     }
 
-    public class Wish
+    private class Request
     {
         public string Status { get; set; }
         public string Category { get; set; }
+        public string Type { get; set; }
         public string Author { get; set; }
         public string Title { get; set; }
+        public string Description { get; set; }
+        public string OfficialSourceLink { get; set; }
         public int Priority { get; set; }
+        public string Justification { get; set; }
         public DateTime DateAdded { get; set; }
         public int Upvotes { get; set; }
+        public int Likes { get; set; }
         public bool IsUpvoted { get; set; }
+        public bool IsLiked { get; set; }
     }
+
 }

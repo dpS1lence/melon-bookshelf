@@ -49,6 +49,29 @@
     background-color: rgba(255,255,255,0.1);
     color: white;
 }
+.logout-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    color: #fff;
+    background-color: #007bff;
+}
+
+    .logout-button:hover {
+        background-color: #0069d9;
+    }
+
+    .logout-button:focus {
+        outline: none;
+    }
+
+    .logout-button:active {
+        background-color: #0056b3;
+    }
+
 
 @media (min-width: 641px) {
     .navbar-toggler {
