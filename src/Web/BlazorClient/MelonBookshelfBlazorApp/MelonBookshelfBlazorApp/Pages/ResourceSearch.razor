@@ -1,6 +1,7 @@
 ﻿@page "/resource-search"
-@using System.Collections.Generic
-@using System.Linq
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
 @inject NavigationManager NavigationManager
 
 <h3>Resource Search</h3>
@@ -52,6 +53,9 @@
             <th>Type</th>
             <th>Category</th>
             <th>Title</th>
+            <th>Author</th>
+            <th>Status</th>
+            <th>Date Added</th>
         </tr>
     </thead>
     <tbody>
@@ -63,6 +67,9 @@
                     <td>@result.Type</td>
                     <td>@result.Category</td>
                     <td>@result.Title</td>
+                    <td>@result.Author</td>
+                    <td>@result.Status</td>
+                    <td>@result.DateAdded.ToString("yyyy-MM-dd")</td>
                 </tr>
             }
         }
@@ -74,6 +81,9 @@
                     <td>@resource.Type</td>
                     <td>@resource.Category</td>
                     <td>@resource.Title</td>
+                    <td>@resource.Author</td>
+                    <td>@resource.Status</td>
+                    <td>@resource.DateAdded.ToString("yyyy-MM-dd")</td>
                 </tr>
             }
         }
@@ -110,11 +120,11 @@
         // Return a list of resources
         return new List<Resource>
         {
-            new Resource { Type = "Type1", Category = "Category 1", Title = "Resource 1" },
-            new Resource { Type = "Type2", Category = "Category 1", Title = "Resource 2" },
-            new Resource { Type = "Type1", Category = "Category 2", Title = "Resource 3" },
-            new Resource { Type = "Type3", Category = "Category 3", Title = "Resource 4" },
-            new Resource { Type = "Type2", Category = "Category 2", Title = "Resource 5" },
+            new Resource { Type = "Type1", Category = "Category 1", Title = "Resource 1", Author = "Author 1", Status = "Status 1", DateAdded = DateTime.Now.AddDays(-5) },
+            new Resource { Type = "Type2", Category = "Category 1", Title = "Resource 2", Author = "Author 2", Status = "Status 2", DateAdded = DateTime.Now.AddDays(-4) },
+            new Resource { Type = "Type1", Category = "Category 2", Title = "Resource 3", Author = "Author 3", Status = "Status 3", DateAdded = DateTime.Now.AddDays(-3) },
+            new Resource { Type = "Type3", Category = "Category 3", Title = "Resource 4", Author = "Author 4", Status = "Status 4", DateAdded = DateTime.Now.AddDays(-2) },
+            new Resource { Type = "Type2", Category = "Category 2", Title = "Resource 5", Author = "Author 5", Status = "Status 5", DateAdded = DateTime.Now.AddDays(-1) },
         };
     }
 
@@ -145,5 +155,8 @@
         public string Type { get; set; }
         public string Category { get; set; }
         public string Title { get; set; }
+        public string Author { get; set; }
+        public string Status { get; set; }
+        public DateTime DateAdded { get; set; }
     }
 }
