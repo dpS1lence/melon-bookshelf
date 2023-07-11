@@ -12,6 +12,10 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddScoped(sp => new AuthenticationFetcher(sp.GetRequiredService<HttpClient>()));
 builder.Services.AddScoped(sp => new ResourcesFetcher(sp.GetRequiredService<HttpClient>()));
+builder.Services.AddScoped(sp => new HRActionsFetcher(sp.GetRequiredService<HttpClient>()));
+builder.Services.AddScoped(sp => new HRDashboardFetcher(sp.GetRequiredService<HttpClient>()));
+builder.Services.AddScoped(sp => new RequestsFetcher(sp.GetRequiredService<HttpClient>()));
+builder.Services.AddScoped(sp => new UserActionsFetcher(sp.GetRequiredService<HttpClient>()));
 builder.Services.AddScoped<AuthenticationService>();
 
 var app = builder.Build();

@@ -1,4 +1,5 @@
 ﻿@page "/register"
+@using MelonBookshelfBlazorApp.Models;
 @inject NavigationManager NavigationManager
 
 <PageTitle>Register</PageTitle>
@@ -11,27 +12,27 @@
 
     <div class="form-group">
         <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" class="form-control" @bind="@FirstName" />
+        <input type="text" id="firstName" class="form-control" @bind="model.FirstName" />
     </div>
 
     <div class="form-group">
         <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" class="form-control" @bind="@LastName" />
+        <input type="text" id="lastName" class="form-control" @bind="model.LastName" />
     </div>
 
     <div class="form-group">
         <label for="email">Email:</label>
-        <input type="email" id="email" class="form-control" @bind="@Email" />
+        <input type="email" id="email" class="form-control" @bind="model.Email" />
     </div>
 
     <div class="form-group">
         <label for="password">Password:</label>
-        <input type="password" id="password" class="form-control" @bind="@Password" />
+        <input type="password" id="password" class="form-control" @bind="model.Password" />
     </div>
 
     <div class="form-group">
         <label for="confirmPassword">Confirm Password:</label>
-        <input type="password" id="confirmPassword" class="form-control" @bind="@ConfirmPassword" />
+        <input type="password" id="confirmPassword" class="form-control" @bind="model.ConfirmPassword" />
     </div>
 
     <div class="login-register-container">
@@ -42,11 +43,7 @@
 </div>
 
 @code {
-    private string FirstName { get; set; }
-    private string LastName { get; set; }
-    private string Email { get; set; }
-    private string Password { get; set; }
-    private string ConfirmPassword { get; set; }
+    RegisterModel model = new RegisterModel();
 
     private void Registers()
     {
