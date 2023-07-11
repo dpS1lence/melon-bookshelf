@@ -28,6 +28,16 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        string token = await _authenticationService.GetToken();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            _navigationManager.NavigateTo("/");
+        }
+    }
+
     private LoginModel loginModel = new LoginModel();
 
     private async Task HandleLogin()
@@ -46,6 +56,8 @@
             _authenticationService.SetBearerToken(loginResult.Token);
 
             _navigationManager.NavigateTo("/home");
+
+            StateHasChanged();
         }
     }
 }

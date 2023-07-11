@@ -1,68 +1,120 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">MelonBookshelfBlazorApp</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
+﻿@using MelonBookshelfBlazorApp.Services;
+@inject NavigationManager _navigationManager
+@inject AuthenticationService _auth
+<div class="top-row ps-3 navbar navbar-dark">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="">MelonBookshelfBlazorApp</a>
+		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+	</div>
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/login">
-                <span class="oi oi-account-login" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/register">
-                <span class="oi oi-account-login" aria-hidden="true"></span> Register
-            </NavLink>
-        </div>
-        <div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/resource-search">
-                    <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Resource Search
-                </NavLink>
-            </div>
-        </div>
-        <div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="borrowed-resources">
-                    <span class="oi oi-book" aria-hidden="true"></span> Borrowed Resources
-                </NavLink>
-            </div>
-        </div>
-        <div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/wishlist">
-                   <span class="oi oi-star" aria-hidden="true"></span> Wishlist
-                </NavLink>
-            </div>
-        </div>
-        <div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/resource-request">
-                    <span class="oi oi-file" aria-hidden="true"></span> Resource Request
-                </NavLink>
-            </div>
-
-        </div>
-    </nav>
+	<nav class="flex-column">
+		@if (noToken)
+		{
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="/login">
+					<span class="oi oi-account-login" aria-hidden="true"></span> Login
+				</NavLink>
+			</div>
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="/register">
+					<span class="oi oi-account-login" aria-hidden="true"></span> Register
+				</NavLink>
+			</div>
+		}
+		else if (isAdmin)
+		{
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+					<button type="button" class="btn btn-register" @onclick="Logout">Log out</button>
+				</NavLink>
+			</div>
+		}
+		else
+		{
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+					<span class="oi oi-home" aria-hidden="true"></span> Home
+				</NavLink>
+			</div>
+			<div>
+				<div class="nav-item px-3">
+					<NavLink class="nav-link" href="/resource-search">
+						<span class="oi oi-magnifying-glass" aria-hidden="true"></span> Resource Search
+					</NavLink>
+				</div>
+			</div>
+			<div>
+				<div class="nav-item px-3">
+					<NavLink class="nav-link" href="borrowed-resources">
+						<span class="oi oi-book" aria-hidden="true"></span> Borrowed Resources
+					</NavLink>
+				</div>
+			</div>
+			<div>
+				<div class="nav-item px-3">
+					<NavLink class="nav-link" href="/wishlist">
+						<span class="oi oi-star" aria-hidden="true"></span> Wishlist
+					</NavLink>
+				</div>
+			</div>
+			<div>
+				<div class="nav-item px-3">
+					<NavLink class="nav-link" href="/resource-request">
+						<span class="oi oi-file" aria-hidden="true"></span> Resource Request
+					</NavLink>
+				</div>
+			</div>
+			<div class="nav-item px-3">
+				<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+					<button type="button" class="btn btn-register" @onclick="Logout">Log out</button>
+				</NavLink>
+			</div>
+		}
+	</nav>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
+	private bool noToken = false;
+	private bool isAdmin = false;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+	protected override async Task OnInitializedAsync()
+	{
+		string? token = await _auth.GetToken();
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+		if (string.IsNullOrEmpty(token))
+		{
+			noToken = true;
+		}
+
+		isAdmin = AuthenticationService.IsUserAdmin(token);
+
+		if (isAdmin)
+		{
+			StateHasChanged();
+		}
+	}
+
+	private bool collapseNavMenu = true;
+
+	private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+
+	private void Logout()
+	{
+		_auth.RemoveToken();
+		noToken = true;
+		isAdmin = false;
+
+		_navigationManager.NavigateTo("/login");
+
+		StateHasChanged();
+	}
 }

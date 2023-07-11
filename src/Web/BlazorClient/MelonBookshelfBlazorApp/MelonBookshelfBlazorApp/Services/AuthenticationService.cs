@@ -1,7 +1,6 @@
 ﻿using MelonBookshelfBlazorApp.Services.Fetchers;
 using Microsoft.JSInterop;
 using System.Net.Http.Headers;
-using System.Net.Http;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -44,6 +43,11 @@ namespace MelonBookshelfBlazorApp.Services
 
         public static bool IsUserAdmin(string token)
         {
+            if(token == null)
+            {
+                return false;
+            }
+
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
 

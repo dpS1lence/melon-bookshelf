@@ -4,6 +4,7 @@
 @using MelonBookshelfBlazorApp.Services.Fetchers;
 @using MelonBookshelfBlazorApp.Services;
 @using Newtonsoft.Json;
+@inject NavigationManager _navigationManager
 @inject ResourcesFetcher _resourceFetcher
 @inject AuthenticationService _auth
 
@@ -11,51 +12,58 @@
 
 @if (resources != null && resources.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Type</th>
-                <th>Category</th>
-                <th>Author</th>
-                <th>Title</th>
-                <th>Borrow Date</th>
-                <th>Expected Return Date</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var resource in resources)
-            {
-                <tr>
-                    <td>@resource.Type</td>
-                    <td>@resource.Author</td>
-                    <td>@resource.Title</td>
-                   @* <td>
-                        <button class="return-button" @onclick="() => ReturnResource(resource)">Return</button>
-                    </td>*@
-                </tr>
-            }
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Type</th>
+				<th>Category</th>
+				<th>Author</th>
+				<th>Title</th>
+				<th>Borrow Date</th>
+				<th>Expected Return Date</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var resource in resources)
+			{
+				<tr>
+					<td>@resource.Type</td>
+					<td>@resource.Author</td>
+					<td>@resource.Title</td>
+					@* <td>
+			<button class="return-button" @onclick="() => ReturnResource(resource)">Return</button>
+			</td>*@
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 else
 {
-    <p>No borrowed resources found.</p>
+	<p>No borrowed resources found.</p>
 }
 
 @code {
-    private IEnumerable<Resource> resources;
+	private IEnumerable<Resource>? resources;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var token = await _auth.GetToken();
+	protected override async Task OnInitializedAsync()
+	{
+		string token = await _auth.GetToken();
 
-        _resourceFetcher.SetBearerToken(token);
+		if (string.IsNullOrEmpty(token))
+		{
+			_navigationManager.NavigateTo("/login");
+		}
+		else
+		{
+			_resourceFetcher.SetBearerToken(token);
 
-        var response = await _resourceFetcher.Resources();
+			var response = await _resourceFetcher.Resources();
 
-        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+			var result = JsonConvert.DeserializeObject<List<Resource>>(response);
 
-        resources = result;
-    }
+			resources = result;
+		}
+	}
 }

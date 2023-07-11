@@ -1,10 +1,12 @@
 ﻿@page "/register"
 @using MelonBookshelfBlazorApp.Models;
 @using MelonBookshelfBlazorApp.Services.Fetchers;
+@using MelonBookshelfBlazorApp.Services;
 @using Newtonsoft.Json;
 @using System.Text;
-@inject NavigationManager NavigationManager
+@inject NavigationManager _navigationManager
 @inject AuthenticationFetcher _auth
+@inject AuthenticationService _authenticationService
 
 <PageTitle>Register</PageTitle>
 
@@ -47,6 +49,16 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        string token = await _authenticationService.GetToken();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            _navigationManager.NavigateTo("/");
+        }
+    }
+
     RegisterModel model = new RegisterModel();
 
     private async Task RegisterAction()
@@ -67,6 +79,6 @@
 
     private void GoToLoginPage()
     {
-        NavigationManager.NavigateTo("/login");
+        _navigationManager.NavigateTo("/login");
     }
 }
