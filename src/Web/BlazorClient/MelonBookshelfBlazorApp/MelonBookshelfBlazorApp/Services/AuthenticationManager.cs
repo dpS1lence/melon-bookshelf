@@ -10,6 +10,8 @@ namespace MelonBookshelfBlazorApp.Services
         public static bool IsAuthenticated { get => isAuthenticated; }
         public static bool IsAdmin { get => isAdmin; }
 
+        public static Action OnChange = delegate { };
+
         public static AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         public static async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -48,6 +50,8 @@ namespace MelonBookshelfBlazorApp.Services
             isAdmin = IsUserAdmin(authState.User.Claims);
 
             Console.WriteLine($"is authenticated {isAuthenticated}, is admin {isAdmin}");
+
+            OnChange.Invoke();
         }
     }
 }
