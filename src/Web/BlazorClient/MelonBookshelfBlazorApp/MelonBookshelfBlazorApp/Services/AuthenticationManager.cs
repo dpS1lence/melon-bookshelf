@@ -63,12 +63,7 @@ namespace MelonBookshelfBlazorApp.Services
 
             if (user.Identity.IsAuthenticated)
             {
-                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim != null)
-                {
-                    var userId = userIdClaim.Value;
-                    return userId;
-                }
+                return user.Claims.First().Value;
             }
 
             throw new ArgumentException(nameof(user));

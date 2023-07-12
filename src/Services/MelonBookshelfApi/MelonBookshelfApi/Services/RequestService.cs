@@ -38,9 +38,9 @@ namespace MelonBookshelfApi.Services
             return _mapper.Map<ResourceRequestDto>(request);
         }
 
-        public IEnumerable<ResourceRequestDto> GetRequests()
+        public async Task<IEnumerable<ResourceRequestDto>> GetRequests()
         {
-            var request = _repository.All<Request>().AsEnumerable();
+            var request = await _repository.All<Request>().AsNoTracking().ToListAsync();
 
             return _mapper.Map<IEnumerable<ResourceRequestDto>>(request);
         }

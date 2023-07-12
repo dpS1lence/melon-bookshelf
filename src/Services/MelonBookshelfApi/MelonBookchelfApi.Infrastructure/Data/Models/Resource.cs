@@ -13,7 +13,7 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
     public class Resource : Model
     {
         [Required]
-        public ResourceType Type { get; set; }
+        public string Type { get; set; }
 
         [ForeignKey(nameof(ResourceCategory))]
         public int CategoryID { get; set; }

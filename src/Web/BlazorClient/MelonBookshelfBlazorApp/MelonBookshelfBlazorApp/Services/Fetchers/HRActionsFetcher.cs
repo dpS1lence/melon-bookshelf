@@ -12,12 +12,12 @@
             => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.RejectRequest, requestId), content);
 
         public Task<string> SetResourceInProgress(string resourceId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetResourceInProgress, resourceId), content);
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestInProgress, resourceId), content);
 
         public Task<string> SetResourceInDelivery(string resourceId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetResourceInDelivery, resourceId), content);
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestInDelivery, resourceId), content);
 
         public Task<string> SetResourceDelivered(string resourceId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetResourceDelivered, resourceId), content);
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestDelivered, resourceId), content);
     }
 }

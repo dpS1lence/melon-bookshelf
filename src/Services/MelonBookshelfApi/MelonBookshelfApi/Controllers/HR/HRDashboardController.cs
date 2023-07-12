@@ -23,17 +23,17 @@ namespace MelonBookshelfApi.Controllers.HR
         }
 
         [HttpGet("hrdashboard/requests")]
-        public IActionResult GetRequests()
+        public async Task<IActionResult> GetRequests()
         {
-            var requests = _requestService.GetRequests();
+            var requests = await _requestService.GetRequests();
 
             return Ok(requests);
         }
 
         [HttpGet("hrdashboard/resources")]
-        public IActionResult GetAllResourcesForHR()
+        public async Task<IActionResult> GetAllResourcesForHR()
         {
-            var resources = _resourceService.GetAllResourcesHR();
+            var resources = await _resourceService.GetAllResourcesHR();
 
             return Ok(resources);
         }

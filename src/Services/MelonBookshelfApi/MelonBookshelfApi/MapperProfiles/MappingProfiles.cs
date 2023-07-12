@@ -9,9 +9,6 @@ namespace MelonBookshelfApi.MapperProfiles
     {
         public MappingProfiles()
         {
-            CreateMap<Resource, PhysicalResource>().ReverseMap();
-            CreateMap<Resource, ResourceHRModel>().ReverseMap();
-            CreateMap<Resource, PhysicalResourceTaken>().ReverseMap();
             CreateMap<Request, ResourceRequestDto>().ReverseMap();
             CreateMap<Resource, ResourceModel>().ReverseMap();
         }

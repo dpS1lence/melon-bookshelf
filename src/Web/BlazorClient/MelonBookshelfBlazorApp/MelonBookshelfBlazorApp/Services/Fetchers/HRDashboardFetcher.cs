@@ -10,8 +10,5 @@
 
         public Task<string> GetAllResourcesForHR()
             => GetAsync(ApiEndpoints.ApiEndpoints.HRDashboard.GetAllResourcesForHR);
-
-        public Task<string> AddResource(HttpContent content)
-            => PostAsync(ApiEndpoints.ApiEndpoints.HRDashboard.AddResource, content);
     }
 }

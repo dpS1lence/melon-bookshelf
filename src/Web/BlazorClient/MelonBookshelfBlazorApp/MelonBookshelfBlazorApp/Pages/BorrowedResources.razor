@@ -5,10 +5,12 @@
 @using MelonBookshelfBlazorApp.Services.Fetchers;
 @using MelonBookshelfBlazorApp.Services;
 @using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
 @using Newtonsoft.Json;
 @inject NavigationManager _navigationManager
 @inject ResourcesFetcher _resourceFetcher
 @inject AuthenticationService _auth
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>Borrowed Resources</h3>
 
@@ -57,7 +59,11 @@ else
 
 		_resourceFetcher.SetBearerToken(token);
 
-		var response = await _resourceFetcher.Resources();
+		var uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
+
+		Console.WriteLine(uId);
+
+		var response = await _resourceFetcher.PhysicalResourcesByUserId(uId);
 
 		var result = JsonConvert.DeserializeObject<List<Resource>>(response);
 

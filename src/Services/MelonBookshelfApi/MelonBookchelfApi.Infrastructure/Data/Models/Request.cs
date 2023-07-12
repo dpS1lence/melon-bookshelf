@@ -33,7 +33,7 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
         public string Link { get; set; } = null!;
 
         [Required]
-        public ResourceType Type { get; set; }
+        public string Type { get; set; }
 
         [Required]
         public string Status { get; set; } = null!;
