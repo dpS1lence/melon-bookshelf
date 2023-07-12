@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Components
 @inject NavigationManager _navigationManager
 @inject AuthenticationService _auth
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
 
 <h3>Requests</h3>
 
@@ -22,6 +23,7 @@
                 <th>Priority</th>
                 <th>Date Added</th>
                 <th>Upvotes</th>
+                <th>Likes</th> <!-- Add Likes column -->
                 <th></th>
                 <th></th>
                 <th></th>
@@ -38,13 +40,15 @@
                     <td>@request.Priority</td>
                     <td>@request.DateAdded.ToShortDateString()</td>
                     <td>@request.Upvotes</td>
+                    <td>@request.Likes</td> <!-- Display number of likes -->
                     <td>
-                        <button class="upvote-button @(request.IsUpvoted ? "upvoted" : "")" @onclick="() => UpvoteRequest(request)">Upvote</button>
+                        <button class="upvote-button @(request.IsUpvoted ? "upvoted" : "")" @onclick="() => ToggleUpvote(request)">@((request.IsUpvoted ? "Upvote" : "Upvote"))</button>
                     </td>
                     <td>
                         <button class="like-button @(request.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(request)">
-                            Like
+                            <i class="fas fa-thumbs-up"></i> 
                         </button>
+
 
                     </td>
                     <td>
@@ -209,18 +213,32 @@ else
         };
     }
 
-    private void UpvoteRequest(Request request)
+    private void ToggleUpvote(Request request)
     {
-        if (!request.IsUpvoted)
+        if (request.IsUpvoted)
+        {
+            request.Upvotes--;
+            request.IsUpvoted = false;
+        }
+        else
         {
             request.Upvotes++;
             request.IsUpvoted = true;
         }
     }
 
-    private void LikeRequest(Request request)
+    private void ToggleLike(Request request)
     {
-        request.Likes++;
+        if (!request.IsLiked)
+        {
+            request.Likes++;
+            request.IsLiked = true;
+        }
+        else
+        {
+            request.Likes--;
+            request.IsLiked = false;
+        }
     }
 
     private void ToggleEditMenu(Request request)
@@ -277,10 +295,6 @@ else
         newRequest = new Request(); // Reset newRequest object
         HideAddRequestModal();
     }
-    private void ToggleLike(Request request)
-    {
-        request.IsLiked = !request.IsLiked;
-    }
 
     private class Request
     {
@@ -299,5 +313,4 @@ else
         public bool IsUpvoted { get; set; }
         public bool IsLiked { get; set; }
     }
-
 }

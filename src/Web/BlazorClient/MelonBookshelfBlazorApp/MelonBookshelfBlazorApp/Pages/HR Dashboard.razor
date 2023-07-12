@@ -120,40 +120,41 @@ else
             <div class="modal-body">
                 <div class="form-group">
                     <label>Category:</label>
-                    <input type="text" class="form-control" @bind="@newResource.Category" />
+                    <input type="text" class="form-control" @bind="@newResource.Category" required />
                 </div>
                 <div class="form-group">
                     <label>Title:</label>
-                    <input type="text" class="form-control" @bind="@newResource.Title" />
+                    <input type="text" class="form-control" @bind="@newResource.Title" required />
                 </div>
                 <div class="form-group">
                     <label>Author:</label>
-                    <input type="text" class="form-control" @bind="@newResource.Author" />
+                    <input type="text" class="form-control" @bind="@newResource.Author" required />
                 </div>
                 <div class="form-group">
                     <label>Description:</label>
-                    <textarea class="form-control" @bind="@newResource.Description"></textarea>
+                    <textarea class="form-control" @bind="@newResource.Description" required></textarea>
                 </div>
                 <div class="form-group">
                     <label>Official Source Link:</label>
-                    <input type="text" class="form-control" @bind="@newResource.OfficialSourceLink" />
+                    <input type="text" class="form-control" @bind="@newResource.OfficialSourceLink" required />
                 </div>
                 <div class="form-group">
                     <label>Price:</label>
-                    <input type="text" class="form-control" @bind="@newResource.Price" />
+                    <input type="text" class="form-control" @bind="@newResource.Price" required />
                 </div>
                 <div class="form-group">
                     <label>Invoice:</label>
-                    <input type="text" class="form-control" @bind="@newResource.Invoice" />
+                    <input type="text" class="form-control" @bind="@newResource.Invoice" required />
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideAddResourceModal">Cancel</button>
-                <button type="button" class="btn btn-primary" @onclick="AddResource">Add Resource</button>
+                <button type="button" class="btn btn-primary" @onclick="AddResource" disabled="@IsAddResourceButtonDisabled()">Add Resource</button>
             </div>
         </div>
     </div>
 </div>
+
 
 <div class="text-right">
     <button class="btn btn-primary" @onclick="ShowAddResourceModal">Add New Resource</button>
@@ -277,6 +278,16 @@ else
     {
         showAddResourceModal = false;
         newResource = new Resource();
+    }
+    private bool IsAddResourceButtonDisabled()
+    {
+        return string.IsNullOrWhiteSpace(newResource.Category) ||
+               string.IsNullOrWhiteSpace(newResource.Title) ||
+               string.IsNullOrWhiteSpace(newResource.Author) ||
+               string.IsNullOrWhiteSpace(newResource.Description) ||
+               string.IsNullOrWhiteSpace(newResource.OfficialSourceLink) ||
+               string.IsNullOrWhiteSpace(newResource.Price.ToString()) ||
+               string.IsNullOrWhiteSpace(newResource.Invoice);
     }
 
     private void AddResource()
