@@ -33,26 +33,26 @@ namespace MelonBookshelfApi.Controllers.HR
             return Ok();
         }
 
-        [HttpPut("hr-actions/resources/{resourceId}/inprogress")]
-        public async Task<IActionResult> SetResourceInProgress(int resourceId)
+        [HttpPut("hr-actions/requests/{requestId}/inprogress")]
+        public async Task<IActionResult> SetRequestInProgress(int requestId)
         {
-            await _automationService.SetResource(resourceId, ResourceStatus.Processing.ToString());
+            await _automationService.SetRequestDeliveryStatus(requestId, ResourceStatus.Processing.ToString());
 
             return Ok();
         }
 
-        [HttpPut("hr-actions/resources/{resourceId}/delivery")]
-        public async Task<IActionResult> SetResourceInDelivery(int resourceId)
+        [HttpPut("hr-actions/requests/{requestId}/delivery")]
+        public async Task<IActionResult> SetRequestInDelivery(int requestId)
         {
-            await _automationService.SetResource(resourceId, ResourceStatus.InDelivery.ToString());
+            await _automationService.SetRequestDeliveryStatus(requestId, ResourceStatus.InDelivery.ToString());
 
             return Ok();
         }
 
-        [HttpPut("hr-actions/resources/{resourceId}/delivered")]
-        public async Task<IActionResult> SetResourceDelivered(int resourceId)
+        [HttpPut("hr-actions/requests/{requestId}/delivered")]
+        public async Task<IActionResult> SetRequestDelivered(int requestId)
         {
-            await _automationService.SetResource(resourceId, ResourceStatus.Delivered.ToString());
+            await _automationService.SetRequestDeliveryStatus(requestId, ResourceStatus.Delivered.ToString());
 
             return Ok();
         }

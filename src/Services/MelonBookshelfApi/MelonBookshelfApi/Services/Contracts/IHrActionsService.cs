@@ -4,6 +4,6 @@
     {
         Task Confirm(int requestId);
         Task Reject(int requestId, string justification);
-        Task SetResource(int resourceId, string processing);
+        Task SetRequestDeliveryStatus(int requestId, string status);
     }
 }

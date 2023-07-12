@@ -21,9 +21,9 @@
         {
             public static string ConfirmRequest { get => "hr-actions/requests/{requestId}/confirm"; }
             public static string RejectRequest { get => "hr-actions/requests/{requestId}/reject"; }
-            public static string SetResourceInProgress { get => "hr-actions/resources/{resourceId}/inprogress"; }
-            public static string SetResourceInDelivery { get => "hr-actions/resources/{resourceId}/delivery"; }
-            public static string SetResourceDelivered { get => "hr-actions/resources/{resourceId}/delivered"; }
+            public static string SetRequestInProgress { get => "hr-actions/requests/{requestId}/inprogress"; }
+            public static string SetRequestInDelivery { get => "hr-actions/requests/{requestId}/delivery"; }
+            public static string SetRequestDelivered { get => "hr-actions/requests/{requestId}/delivered"; }
         }
 
         public static class HRDashboard

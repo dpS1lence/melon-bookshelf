@@ -48,18 +48,18 @@ namespace MelonBookshelfApi.Services
             await _repository.SaveChangesAsync();
         }
 
-        public async Task SetResource(int resourceId, string status)
+        public async Task SetRequestDeliveryStatus(int requestId, string status)
         {
-            var resource = await _repository.GetByIdAsync<Resource>(resourceId);
+            var request = await _repository.GetByIdAsync<Request>(requestId);
 
-            if (resource == null)
+            if (request == null)
             {
-                throw new ArgumentException(null, nameof(resourceId));
+                throw new ArgumentException(null, nameof(request));
             }
 
-            resource.Status = status;
+            request.DeliveryStatus = status;
 
-            _repository.Update(resource);
+            _repository.Update(request);
             await _repository.SaveChangesAsync();
         }
     }
