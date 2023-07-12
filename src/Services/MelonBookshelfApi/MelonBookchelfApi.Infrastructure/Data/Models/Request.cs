@@ -39,6 +39,9 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
         public string Status { get; set; } = null!;
 
         [Required]
+        public string DeliveryStatus { get; set; } = null!;
+
+        [Required]
         public string Priority { get; set; } = null!;
 
         public string? RefusalReason { get; set; }

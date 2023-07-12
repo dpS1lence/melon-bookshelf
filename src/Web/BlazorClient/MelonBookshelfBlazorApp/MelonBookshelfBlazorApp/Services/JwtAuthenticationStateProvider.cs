@@ -23,7 +23,7 @@ namespace MelonBookshelfBlazorApp.Services
 		{
 			var token = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
 
-			if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token))
 			{
 				return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 			}

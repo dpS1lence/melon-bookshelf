@@ -12,7 +12,7 @@ namespace MelonBookshelfBlazorApp.Services
 
         public static Action OnChange = delegate { };
 
-        public static AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        public static AuthenticationStateProvider AuthenticationStateProvider { private get; set; }
 
         public static async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
@@ -21,6 +21,10 @@ namespace MelonBookshelfBlazorApp.Services
 
         public static bool IsUserAdmin(IEnumerable<Claim> claims)
         {
+            foreach (var item in claims)
+            {
+                Console.WriteLine(item.Type + " " + item.Value);
+            }
             isAdmin = claims.Any(c => c.Value == "Admin");
 
             Console.WriteLine("is admin " + isAdmin);
@@ -49,9 +53,45 @@ namespace MelonBookshelfBlazorApp.Services
             isAuthenticated = IsUserAuthenticated(authState);
             isAdmin = IsUserAdmin(authState.User.Claims);
 
-            Console.WriteLine($"is authenticated {isAuthenticated}, is admin {isAdmin}");
-
             OnChange.Invoke();
+        }
+
+        public static async Task<string> GetUserId(AuthenticationStateProvider authenticationStateProvider)
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null)
+                {
+                    var userId = userIdClaim.Value;
+                    return userId;
+                }
+            }
+
+            throw new ArgumentException(nameof(user));
+        }
+
+        public static async Task<string> GetUserName(AuthenticationStateProvider authenticationStateProvider)
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+				foreach (var claim in user.Claims)
+				{
+					if (claim.Value.Contains('@'))
+					{
+						return claim.Value;
+
+					}
+				}
+			}
+
+            throw new ArgumentException(nameof(user));
         }
     }
 }

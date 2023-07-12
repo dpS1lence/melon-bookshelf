@@ -37,13 +37,5 @@ namespace MelonBookshelfApi.Controllers.HR
 
             return Ok(resources);
         }
-
-        [HttpPost("hrdashboard/create-resource")]
-        public async Task<IActionResult> AddResource([FromBody] ResourceHRModel model)
-        {
-            await _resourceService.AddResource(model);
-
-            return Ok();
-        }
     }
 }

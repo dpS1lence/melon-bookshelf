@@ -38,7 +38,7 @@
 
 		if (!string.IsNullOrEmpty(token))
 		{
-			_navigationManager.NavigateTo("/resource-search");
+			_navigationManager.NavigateTo("/");
 		}
 	}
 
@@ -58,8 +58,8 @@
 			var authStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
 			authStateProvider.NotifyStateChanged();
 
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-			await InvokeAsync(StateHasChanged);
+			await AuthenticationManager.UpdateAuthenticationState();
 		}
 	}
+
 }

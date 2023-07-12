@@ -23,11 +23,11 @@ namespace MelonBookshelfApi.Services
             _userManager = userManager;
         }
 
-        public async Task AddResource(ResourceHRModel model)
+        public async Task AddResource(ResourceModel model)
         {
             var resource = _mapper.Map<Resource>(model);
 
-            var category = await _repository.All<ResourceCategory>().Where(a => a.Name == model.Category.Name).FirstOrDefaultAsync();
+            var category = await _repository.All<ResourceCategory>().Where(a => a.Name == model.ResourceCategory.Name).FirstOrDefaultAsync();
 
             if(category == null)
             {
@@ -62,11 +62,11 @@ namespace MelonBookshelfApi.Services
             return list;
         }
 
-        public async Task<IEnumerable<ResourceHRModel>> GetAllResourcesHR()
+        public async Task<IEnumerable<ResourceModel>> GetAllResourcesHR()
         {
             var resources = await _repository.All<Resource>().AsNoTracking().ToListAsync();
 
-            var list = new List<ResourceHRModel>();
+            var list = new List<ResourceModel>();
 
             foreach (var item in resources)
             {
@@ -78,7 +78,7 @@ namespace MelonBookshelfApi.Services
 
                 item.ResourceCategory = result;
 
-                list.Add(_mapper.Map<ResourceHRModel>(item));
+                list.Add(_mapper.Map<ResourceModel>(item));
             }
 
             return list;
@@ -91,16 +91,16 @@ namespace MelonBookshelfApi.Services
             return categories;
         }
 
-        public async Task<PhysicalResource> GetPhysicalResourceByIdAsync(string pysicalResourceId)
+        public async Task<ResourceModel> GetPhysicalResourceByIdAsync(string pysicalResourceId)
         {
             var resource = await _repository.GetByIdAsync<Resource>(pysicalResourceId);
 
-            var map = _mapper.Map<PhysicalResource>(resource);
+            var map = _mapper.Map<ResourceModel>(resource);
 
             return map;
         }
 
-        public async Task<IEnumerable<PhysicalResourceTaken>> GetPhysicalResourcesByUserIdAsync(string userId)
+        public async Task<IEnumerable<ResourceModel>> GetPhysicalResourcesByUserIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -116,7 +116,7 @@ namespace MelonBookshelfApi.Services
                 .Select(a => a.Resource)
                 .ToListAsync();
 
-            var map = _mapper.Map<IEnumerable<PhysicalResourceTaken>>(userResources);
+            var map = _mapper.Map<IEnumerable<ResourceModel>>(userResources);
 
             return map;
         }
@@ -164,7 +164,7 @@ namespace MelonBookshelfApi.Services
 
                 serachResultCollection.Add(new ResourceModel
                 {
-                    Type = item.Type,
+                    Type = item.Type.ToString(),
                     Title = item.Title,
                     Author = item.Author,
                     Description = item.Description,

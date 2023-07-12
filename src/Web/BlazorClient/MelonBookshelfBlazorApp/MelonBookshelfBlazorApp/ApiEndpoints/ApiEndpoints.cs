@@ -30,7 +30,6 @@
         {
             public static string GetRequests { get => "hrdashboard/requests"; }
             public static string GetAllResourcesForHR { get => "hrdashboard/resources"; }
-            public static string AddResource { get => "hrdashboard/create-resource"; }
         }
 
         public static class RequestsData

@@ -51,6 +51,16 @@
 </div>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        string token = await _authenticationService.GetToken();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            _navigationManager.NavigateTo("/");
+        }
+    }
+
     RegisterModel model = new RegisterModel();
 
     private async Task RegisterAction()

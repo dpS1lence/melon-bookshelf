@@ -128,6 +128,7 @@ namespace MelonBookshelfApi.Services
             {
                 Title = requestDto.Title,
                 Type = requestDto.Type,
+                DeliveryStatus = requestDto.DeliveryStatus,
                 Author = requestDto.Author,
                 Description = requestDto.Description,
                 Category = requestDto.Category,

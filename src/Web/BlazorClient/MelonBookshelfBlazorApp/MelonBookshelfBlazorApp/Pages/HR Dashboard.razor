@@ -1,5 +1,9 @@
 ﻿@page "/hr-dashboard"
-
+@using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager _navigationManager
 
 <h3>Resource Requests</h3>
 
@@ -46,6 +50,10 @@
         </tbody>
     </table>
 }
+else if(isLoading)
+{
+    <p>Loading...</p>
+}
 else
 {
     <p>No resource requests found.</p>
@@ -86,9 +94,13 @@ else
         </tbody>
     </table>
 }
+else if (isLoading)
+{
+    <p>Loading...</p>
+}
 else
 {
-    <p>No available resources found.</p>
+    <p>No resource requests found.</p>
 }
 
 <div class="modal" style="display: @(showRejectionModal ? "block" : "none")">
@@ -168,12 +180,25 @@ else
     private string rejectionJustification = "";
     private bool showAddResourceModal = false;
     private Resource newResource = new Resource();
+    private bool isUserAdmin = false;
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isUserAdmin = AuthenticationManager.IsUserAdmin(state.User.Claims);
+
+        if (!isUserAdmin)
+        {
+            _navigationManager.NavigateTo("/");
+        }
+
         // Simulate fetching resource requests and available resources from a data source
+        isLoading = true;
         ResourceRequests = await FetchResourceRequests();
         AvailableResources = await FetchAvailableResources();
+        isLoading = false;
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task<List<ResourceRequest>> FetchResourceRequests()

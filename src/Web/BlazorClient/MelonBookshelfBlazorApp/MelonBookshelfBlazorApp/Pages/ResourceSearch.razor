@@ -15,78 +15,86 @@
 @inject AuthenticationService _auth
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<h3>Resource Search</h3>
-
-<div class="search-bar">
-    <div class="search-form">
-        <div class="form-group">
-            <label for="resourceType">Type:</label>
-            <select id="resourceType" class="form-control" @bind="@SearchRequestModel.Type">
-                <option value="">All</option>
-                <option value="Video">Video</option>
-                <option value="Audio">Audio</option>
-                <option value="Book">Book</option>
-                <option value="Cource">Cource</option>
-            </select>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="mb-4">Resource Search</h3>
+            <form class="form-inline mb-4 row">
+                <div class="form-group col-md-2">
+                    <label for="resourceType" class="mr-2">Type:</label>
+                    <select id="resourceType" class="form-control" @bind="@SearchRequestModel.Type">
+                        <option value="">All</option>
+                        <option value="Video">Video</option>
+                        <option value="Audio">Audio</option>
+                        <option value="Book">Book</option>
+                        <option value="Course">Course</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="category" class="mr-2">Category:</label>
+                    <select id="category" class="form-control" @bind="@SearchRequestModel.Category">
+                        <option value="">All</option>
+                        @foreach (var category in Categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="title" class="mr-2">Title:</label>
+                    <input type="text" id="title" class="form-control" @bind="@SearchRequestModel.Title" />
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="submit" class="btn btn-primary btn-block btn-custom-padding" @onclick="Search">Search</button>
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="button" class="btn btn-secondary btn-block btn-custom-padding" @onclick="Reset">Reset</button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label for="category">Category:</label>
-            <select id="category" class="form-control" @bind="@SearchRequestModel.Category">
-                <option value="">All</option>
-                @foreach (var category in Categories)
-                {
-                    <option value="@category">@category</option>
-                }
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" id="title" class="form-control" @bind="@SearchRequestModel.Title" />
-        </div>
-
-        <div class="form-group">
-            <button type="button" class="btn btn-primary" @onclick="Search">Search</button>
-            <button type="button" class="btn btn-secondary" @onclick="Reset">Reset</button>
+    <div class="row">
+        <div class="col-lg-12">
+            <h4 class="mb-4">Search Results:</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Status</th>
+                        <th>Date Added</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Resources != null)
+                    {
+                        foreach (var result in Resources)
+                        {
+                            <tr>
+                                <td>@result.Type</td>
+                                <td>@result.ResourceCategory.Name</td>
+                                <td>@result.Title</td>
+                                <td>@result.Author</td>
+                                <td>@result.Status</td>
+                                <td>@result.DateAdded.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    }
+                    @if (Resources == null || !Resources.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center">No results found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-
-<h4>Search Results:</h4>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Type</th>
-            <th>Category</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Status</th>
-            <th>Date Added</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Resources != null)
-        {
-            foreach (var result in Resources)
-            {
-                <tr>
-                    <td>@result.Type</td>
-                    <td>@result.ResourceCategory.Name</td>
-                    <td>@result.Title</td>
-                    <td>@result.Author</td>
-                    <td>@result.Status</td>
-                    <td>@result.DateAdded.ToString("yyyy-MM-dd")</td>
-                </tr>
-            }
-        }
-        @if (Resources == null || !Resources.Any())
-        {
-            <p>No results found.</p>
-        }
-    </tbody>
-</table>
 
 @code {
     private SearchRequestModel SearchRequestModel { get; set; } = new SearchRequestModel();

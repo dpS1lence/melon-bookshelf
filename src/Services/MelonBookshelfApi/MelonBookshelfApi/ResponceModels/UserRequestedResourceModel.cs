@@ -4,6 +4,8 @@
     {
         public string Status { get; set; } = null!;
 
+        public string DeliveryStatus { get; set; }
+
         public string Category { get; set; } = null!;
 
         public string Author { get; set; } = null!;
