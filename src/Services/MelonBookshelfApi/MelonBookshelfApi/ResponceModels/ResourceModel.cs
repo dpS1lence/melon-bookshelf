@@ -27,6 +27,6 @@ namespace MelonBookshelfApi.ResponceModels
 
         public string? ResourceDetails { get; set; }
 
-        public string ResourceCategory { get; set; } = null!;
+        public ResourceCategory ResourceCategory { get; set; } = null!;
     }
 }

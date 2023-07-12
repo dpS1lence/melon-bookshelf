@@ -30,7 +30,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
             return Ok(resources);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("resources/search")]
         public async Task<IActionResult> SearchResources([FromBody] SearchResourcesDto dto)
         {
@@ -42,7 +42,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
                 filteredResources = filteredResources.Where(r => r.Type.ToString().Equals(dto.Type, StringComparison.OrdinalIgnoreCase)).ToList();
 
             if (!string.IsNullOrEmpty(dto.Category))
-                filteredResources = filteredResources.Where(r => r.ResourceCategory.Equals(dto.Category, StringComparison.OrdinalIgnoreCase)).ToList();
+                filteredResources = filteredResources.Where(r => r.ResourceCategory.Name.Equals(dto.Category, StringComparison.OrdinalIgnoreCase)).ToList();
 
             if (!string.IsNullOrEmpty(dto.Title))
                 filteredResources = filteredResources.Where(r => r.Title.Contains(dto.Title, StringComparison.OrdinalIgnoreCase)).ToList();

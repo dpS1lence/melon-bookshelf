@@ -24,6 +24,6 @@ namespace MelonBookshelfBlazorApp.Models
 
         public string? ResourceDetails { get; set; }
 
-        public string ResourceCategory { get; set; } = default!;
+        public CategoryModel ResourceCategory { get; set; } = default!;
     }
 }

@@ -3,11 +3,16 @@
 @using System;
 @using System.Collections.Generic;
 @using System.Linq;
+@using MelonBookshelfBlazorApp.Models;
 @using MelonBookshelfBlazorApp.Services;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
 @using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.Authorization;
+@using Newtonsoft.Json;
+@using System.Text;
 @inject NavigationManager _navigationManager
-@inject AuthenticationService _authenticationService
+@inject ResourcesFetcher _resourceFetcher
+@inject AuthenticationService _auth
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>Resource Search</h3>
@@ -16,17 +21,18 @@
     <div class="search-form">
         <div class="form-group">
             <label for="resourceType">Type:</label>
-            <select id="resourceType" class="form-control" @bind="@SelectedType">
+            <select id="resourceType" class="form-control" @bind="@SearchRequestModel.Type">
                 <option value="">All</option>
-                <option value="Type1">Type1</option>
-                <option value="Type2">Type2</option>
-                <option value="Type3">Type3</option>
+                <option value="Video">Video</option>
+                <option value="Audio">Audio</option>
+                <option value="Book">Book</option>
+                <option value="Cource">Cource</option>
             </select>
         </div>
 
         <div class="form-group">
             <label for="category">Category:</label>
-            <select id="category" class="form-control" @bind="@SelectedCategory">
+            <select id="category" class="form-control" @bind="@SearchRequestModel.Category">
                 <option value="">All</option>
                 @foreach (var category in Categories)
                 {
@@ -37,7 +43,7 @@
 
         <div class="form-group">
             <label for="title">Title:</label>
-            <input type="text" id="title" class="form-control" @bind="@Title" />
+            <input type="text" id="title" class="form-control" @bind="@SearchRequestModel.Title" />
         </div>
 
         <div class="form-group">
@@ -47,10 +53,6 @@
     </div>
 </div>
 
-@if (SearchPerformed && (SearchResults == null || !SearchResults.Any()))
-{
-    <p>No results found.</p>
-}
 
 <h4>Search Results:</h4>
 <table class="table">
@@ -65,13 +67,13 @@
         </tr>
     </thead>
     <tbody>
-        @if (SearchPerformed && SearchResults != null)
+        @if (Resources != null)
         {
-            foreach (var result in SearchResults)
+            foreach (var result in Resources)
             {
                 <tr>
                     <td>@result.Type</td>
-                    <td>@result.Category</td>
+                    <td>@result.ResourceCategory.Name</td>
                     <td>@result.Title</td>
                     <td>@result.Author</td>
                     <td>@result.Status</td>
@@ -79,99 +81,77 @@
                 </tr>
             }
         }
-        else if (!SearchPerformed && Resources != null)
+        @if (Resources == null || !Resources.Any())
         {
-            foreach (var resource in Resources)
-            {
-                <tr>
-                    <td>@resource.Type</td>
-                    <td>@resource.Category</td>
-                    <td>@resource.Title</td>
-                    <td>@resource.Author</td>
-                    <td>@resource.Status</td>
-                    <td>@resource.DateAdded.ToString("yyyy-MM-dd")</td>
-                </tr>
-            }
+            <p>No results found.</p>
         }
     </tbody>
 </table>
 
 @code {
+    private SearchRequestModel SearchRequestModel { get; set; } = new SearchRequestModel();
 
+    private List<Resource> Resources { get; set; } = new List<Resource>();
 
-    private string SelectedType { get; set; }
-    private string SelectedCategory { get; set; }
-    private string Title { get; set; }
+    private List<string> Categories { get; set; } = new List<string>();
 
-    private List<Resource> Resources { get; set; }
-
-    private bool SearchPerformed { get; set; }
-    private List<Resource> SearchResults { get; set; }
-
-    private List<string> Categories { get; set; } = new List<string>
-    {
-        "Category 1",
-        "Category 2",
-        "Category 3"
-    };
+    private string token = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        AuthenticationManager.AuthenticationStateProvider = AuthenticationStateProvider;
+        //var authStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+        //authStateProvider.NotifyStateChanged();
+        //
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //await InvokeAsync(StateHasChanged);
 
-        await AuthenticationManager.UpdateAuthenticationState();
+        token = await _auth.GetToken();
 
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-        AuthenticationManager.IsUserAuthenticated(state);
-        AuthenticationManager.IsUserAdmin(state.User.Claims);
-
-        Resources = GetResources();
+        await InvokeAsync(GetResources);
+        await InvokeAsync(GetCategories);
     }
 
-    private List<Resource> GetResources()
+    private async Task GetResources()
     {
-        // Implement your logic to fetch resources from your data source
-        // Return a list of resources
-        return new List<Resource>
-        {
-            new Resource { Type = "Type1", Category = "Category 1", Title = "Resource 1", Author = "Author 1", Status = "Status 1", DateAdded = DateTime.Now.AddDays(-5) },
-            new Resource { Type = "Type2", Category = "Category 1", Title = "Resource 2", Author = "Author 2", Status = "Status 2", DateAdded = DateTime.Now.AddDays(-4) },
-            new Resource { Type = "Type1", Category = "Category 2", Title = "Resource 3", Author = "Author 3", Status = "Status 3", DateAdded = DateTime.Now.AddDays(-3) },
-            new Resource { Type = "Type3", Category = "Category 3", Title = "Resource 4", Author = "Author 4", Status = "Status 4", DateAdded = DateTime.Now.AddDays(-2) },
-            new Resource { Type = "Type2", Category = "Category 2", Title = "Resource 5", Author = "Author 5", Status = "Status 5", DateAdded = DateTime.Now.AddDays(-1) },
-        };
+        _resourceFetcher.SetBearerToken(token);
+
+        var response = await _resourceFetcher.Resources();
+
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+
+        Resources = result;
     }
 
-    private void Search()
+    private async Task Search()
     {
-        // Perform the search logic and populate the SearchResults list
-        // Replace this with your actual search implementation
-        SearchResults = Resources.Where(r =>
-            (string.IsNullOrEmpty(SelectedType) || r.Type == SelectedType) &&
-            (string.IsNullOrEmpty(SelectedCategory) || r.Category == SelectedCategory) &&
-            (string.IsNullOrEmpty(Title) || r.Title.Contains(Title, StringComparison.OrdinalIgnoreCase))
-        ).ToList();
+        _resourceFetcher.SetBearerToken(token);
 
-        SearchPerformed = true;
+        var jsonContent = new StringContent(JsonConvert.SerializeObject(SearchRequestModel), Encoding.UTF8, "application/json");
+
+        var response = await _resourceFetcher.SearchResources(jsonContent);
+
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+
+        Resources = result;
     }
 
-    private void Reset()
+    private async Task GetCategories()
     {
-        SelectedType = "";
-        SelectedCategory = "";
-        Title = "";
-        SearchPerformed = false;
-        SearchResults = null;
+        _resourceFetcher.SetBearerToken(token);
+
+        var response = await _resourceFetcher.GetResourcesCategories();
+
+        var result = JsonConvert.DeserializeObject<List<string>>(response);
+
+        Categories = result;
     }
 
-    public class Resource
+    private async Task Reset()
     {
-        public string Type { get; set; }
-        public string Category { get; set; }
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string Status { get; set; }
-        public DateTime DateAdded { get; set; }
+        SearchRequestModel = new SearchRequestModel();
+
+        await InvokeAsync(GetResources);
+
+        await InvokeAsync(StateHasChanged);
     }
 }

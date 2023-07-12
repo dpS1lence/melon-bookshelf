@@ -27,7 +27,7 @@ namespace MelonBookshelfApi.Services
         {
             var resource = _mapper.Map<Resource>(model);
 
-            var category = await _repository.All<ResourceCategory>().Where(a => a.Name == model.Category).FirstOrDefaultAsync();
+            var category = await _repository.All<ResourceCategory>().Where(a => a.Name == model.Category.Name).FirstOrDefaultAsync();
 
             if(category == null)
             {
@@ -137,22 +137,23 @@ namespace MelonBookshelfApi.Services
 
         public async Task<IEnumerable<ResourceModel>> SearchResources(string? type, string? category, string? title)
         {
-            var allResources = _repository
+            var allResources = await _repository
                 .All<Resource>()
+                .AsNoTracking()
                 .Include(a=>a.ResourceCategory)
-                .AsQueryable();
+                .ToListAsync();
 
             if (!string.IsNullOrEmpty(type))
             {
-                allResources = allResources.Where(r => r.Type.ToString() == type);
+                allResources = allResources.Where(r => r.Type.ToString() == type).ToList();
             }
             if (!string.IsNullOrEmpty(category))
             {
-                allResources = allResources.Where(r => r.ResourceCategory.Name == category);
+                allResources = allResources.Where(r => r.ResourceCategory.Name == category).ToList();
             }
             if (!string.IsNullOrEmpty(title))
             {
-                allResources = allResources.Where(r => r.Title == title);
+                allResources = allResources.Where(r => r.Title == title).ToList();
             }
 
             var serachResultCollection = new List<ResourceModel>();
@@ -173,7 +174,7 @@ namespace MelonBookshelfApi.Services
                     PurchasePrice = item.PurchasePrice,
                     InvoiceAttachment = item.InvoiceAttachment,
                     ResourceDetails = item.ResourceDetails,
-                    ResourceCategory = itemCategory.Name
+                    ResourceCategory = itemCategory
                 });
             }
 
