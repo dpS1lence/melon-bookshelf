@@ -1,0 +1,161 @@
+﻿@page "/hr-dashboard"
+
+<h3>Resource Requests</h3>
+
+@if (ResourceRequests != null && ResourceRequests.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Official Source Link</th>
+                <th>User</th>
+                <th>Justification</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in ResourceRequests)
+            {
+                <tr>
+                    <td>@request.Category</td>
+                    <td>@request.Type</td>
+                    <td>@request.Title</td>
+                    <td>@request.Author</td>
+                    <td>@request.OfficialSourceLink</td>
+                    <td>@request.User</td>
+                    <td>@request.Justification</td>
+                    <td>
+                        @if (request.Status == "Pending")
+                        {
+                            <button class="btn btn-primary" @onclick="() => ConfirmRequest(request)">Confirm</button>
+                        }
+                        else if (request.Status == "Preparing")
+                        {
+                            <button class="btn btn-success">In Progress</button>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => ShowRejectionModal(request)">Reject</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No resource requests found.</p>
+}
+
+<div class="modal" style="display: @(showRejectionModal ? "block" : "none")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reject Request</h5>
+                <button type="button" class="close" data-dismiss="modal" @onclick="HideRejectionModal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Justification:</label>
+                    <textarea class="form-control" @bind="@rejectionJustification"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideRejectionModal">Cancel</button>
+                <button type="button" class="btn btn-danger" @onclick="() => RejectRequest(selectedRequest)">Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ResourceRequest> ResourceRequests { get; set; }
+    private ResourceRequest selectedRequest;
+    private bool showRejectionModal = false;
+    private string rejectionJustification = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate fetching resource requests from a data source
+        ResourceRequests = await FetchResourceRequests();
+    }
+
+    private async Task<List<ResourceRequest>> FetchResourceRequests()
+    {
+        // Simulate asynchronous data fetching
+        await Task.Delay(1000);
+
+        return new List<ResourceRequest>
+        {
+            new ResourceRequest
+            {
+                Category = "Category 1",
+                Type = "Type 1",
+                Title = "Title 1",
+                Author = "Author 1",
+                OfficialSourceLink = "https://example.com",
+                User = "User 1",
+                Justification = "Justification 1",
+                Status = "Pending"
+            },
+            new ResourceRequest
+            {
+                Category = "Category 2",
+                Type = "Type 2",
+                Title = "Title 2",
+                Author = "Author 2",
+                OfficialSourceLink = "https://example.com",
+                User = "User 2",
+                Justification = "Justification 2",
+                Status = "Pending"
+            },
+            // Add more resource requests as needed
+        };
+    }
+
+    private void ConfirmRequest(ResourceRequest request)
+    {
+        // Perform confirmation logic
+        request.Status = "Preparing";
+        Console.WriteLine("Request Confirmed: " + request.Title);
+    }
+
+    private void ShowRejectionModal(ResourceRequest request)
+    {
+        selectedRequest = request;
+        showRejectionModal = true;
+    }
+
+    private void HideRejectionModal()
+    {
+        showRejectionModal = false;
+        rejectionJustification = "";
+    }
+
+    private void RejectRequest(ResourceRequest request)
+    {
+        // Perform rejection logic using rejectionJustification value
+        // ...
+        Console.WriteLine("Request Rejected: " + request.Title + ", Justification: " + rejectionJustification);
+        HideRejectionModal();
+    }
+
+    public class ResourceRequest
+    {
+        public string Category { get; set; }
+        public string Type { get; set; }
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public string OfficialSourceLink { get; set; }
+        public string User { get; set; }
+        public string Justification { get; set; }
+        public string Status { get; set; }
+    }
+}
