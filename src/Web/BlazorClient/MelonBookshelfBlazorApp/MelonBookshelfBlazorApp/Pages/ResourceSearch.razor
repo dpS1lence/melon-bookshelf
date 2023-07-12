@@ -1,8 +1,14 @@
 ﻿@page "/resource-search"
+@attribute [Authorize]
 @using System;
 @using System.Collections.Generic;
 @using System.Linq;
-@inject NavigationManager NavigationManager
+@using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject NavigationManager _navigationManager
+@inject AuthenticationService _authenticationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>Resource Search</h3>
 
@@ -91,6 +97,8 @@
 </table>
 
 @code {
+
+
     private string SelectedType { get; set; }
     private string SelectedCategory { get; set; }
     private string Title { get; set; }
@@ -107,10 +115,17 @@
         "Category 3"
     };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Simulate retrieving resources from your project
-        // Replace this with your actual logic to fetch resources from your data source
+        AuthenticationManager.AuthenticationStateProvider = AuthenticationStateProvider;
+
+        await AuthenticationManager.UpdateAuthenticationState();
+
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        AuthenticationManager.IsUserAuthenticated(state);
+        AuthenticationManager.IsUserAdmin(state.User.Claims);
+
         Resources = GetResources();
     }
 

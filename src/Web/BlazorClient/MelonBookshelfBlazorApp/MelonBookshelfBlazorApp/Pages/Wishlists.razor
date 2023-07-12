@@ -1,7 +1,12 @@
 ﻿@page "/requests"
+@attribute [Authorize]
 @using System.Collections.Generic
+@using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
+@inject NavigationManager _navigationManager
+@inject AuthenticationService _auth
 
 <h3>Requests</h3>
 

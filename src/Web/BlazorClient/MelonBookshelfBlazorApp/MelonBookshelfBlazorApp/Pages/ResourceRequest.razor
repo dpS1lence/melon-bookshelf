@@ -1,8 +1,12 @@
 ﻿@page "/resource-request"
+@attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Mail
+@using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.Forms
-@inject NavigationManager NavigationManager
+@inject NavigationManager _navigationManager
+@inject AuthenticationService _auth
 
 <h3>Add Resource Request</h3>
 
@@ -72,6 +76,7 @@
 </EditForm>
 
 @code {
+
     private string Category { get; set; }
     private string Type { get; set; }
     private string Title { get; set; }

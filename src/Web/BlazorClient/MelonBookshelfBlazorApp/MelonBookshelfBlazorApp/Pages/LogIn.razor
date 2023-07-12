@@ -1,63 +1,65 @@
 ﻿@page "/login"
+@attribute [AllowAnonymous]
 @using MelonBookshelfBlazorApp.Models;
 @using MelonBookshelfBlazorApp.Models.Results;
 @using MelonBookshelfBlazorApp.Services.Fetchers;
 @using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
 @using Newtonsoft.Json;
 @using System.Text;
 @inject NavigationManager _navigationManager
 @inject AuthenticationFetcher _authenticationFetcher
-@inject AuthenticationService _authenticationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationService _authService
 
 <PageTitle>LogIn</PageTitle>
 
 <div class="login-container">
-    <h3>Login</h3>
+	<h3>Login</h3>
 
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" class="form-control" @bind="loginModel.Email" />
-    </div>
+	<div class="form-group">
+		<label for="email">Email:</label>
+		<input type="email" id="email" class="form-control" @bind="loginModel.Email" />
+	</div>
 
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" class="form-control" @bind="loginModel.Password" />
-    </div>
+	<div class="form-group">
+		<label for="password">Password:</label>
+		<input type="password" id="password" class="form-control" @bind="loginModel.Password" />
+	</div>
 
-    <button type="button" class="btn-login" @onclick="HandleLogin">Login</button>
+	<button type="button" class="btn-login" @onclick="HandleLogin">Login</button>
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync()
-    {
-        string token = await _authenticationService.GetToken();
+	protected override async Task OnInitializedAsync()
+	{
+		string token = await _authService.GetToken();
 
-        if (!string.IsNullOrEmpty(token))
-        {
-            _navigationManager.NavigateTo("/");
-        }
-    }
+		if (!string.IsNullOrEmpty(token))
+		{
+			_navigationManager.NavigateTo("/resource-search");
+		}
+	}
 
-    private LoginModel loginModel = new LoginModel();
+	private LoginModel loginModel = new LoginModel();
 
-    private async Task HandleLogin()
-    {
-        var jsonContent = new StringContent(JsonConvert.SerializeObject(loginModel), Encoding.UTF8, "application/json");
+	private async Task HandleLogin()
+	{
+		var jsonContent = new StringContent(JsonConvert.SerializeObject(loginModel), Encoding.UTF8, "application/json");
 
-        var response = await _authenticationFetcher.Login(jsonContent);
-        var loginResult = JsonConvert.DeserializeObject<LoginResult>(response);
+		var response = await _authenticationFetcher.Login(jsonContent);
+		var token = JsonConvert.DeserializeObject<LoginResult>(response).Token;
 
-        if(loginResult == null || string.IsNullOrEmpty(loginResult.Token))
-        {
-            
-        }
-        else
-        {
-            _authenticationService.SetBearerToken(loginResult.Token);
+		if (!string.IsNullOrEmpty(token))
+		{
+			_authService.SetBearerToken(token);
 
-            _navigationManager.NavigateTo("/home");
+			var authStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+			authStateProvider.NotifyStateChanged();
 
-            StateHasChanged();
-        }
-    }
+			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
 }

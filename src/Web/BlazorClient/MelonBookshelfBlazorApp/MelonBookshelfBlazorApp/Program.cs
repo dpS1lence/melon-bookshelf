@@ -1,6 +1,7 @@
 using MelonBookshelfBlazorApp;
 using MelonBookshelfBlazorApp.Services;
 using MelonBookshelfBlazorApp.Services.Fetchers;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -17,10 +18,10 @@ builder.Services.AddScoped(sp => new HRDashboardFetcher(sp.GetRequiredService<Ht
 builder.Services.AddScoped(sp => new RequestsFetcher(sp.GetRequiredService<HttpClient>()));
 builder.Services.AddScoped(sp => new UserActionsFetcher(sp.GetRequiredService<HttpClient>()));
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
+
+builder.Services.AddAuthorizationCore();
 
 var app = builder.Build();
-
-var authenticationService = app.Services.GetRequiredService<AuthenticationService>();
-await authenticationService.InitializeClientToken();
 
 await app.RunAsync();

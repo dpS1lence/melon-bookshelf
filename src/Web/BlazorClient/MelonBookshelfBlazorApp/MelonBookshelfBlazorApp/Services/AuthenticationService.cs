@@ -1,8 +1,9 @@
 ﻿using MelonBookshelfBlazorApp.Services.Fetchers;
 using Microsoft.JSInterop;
-using System.Net.Http.Headers;
-using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Security.Claims;
 
 namespace MelonBookshelfBlazorApp.Services
 {
@@ -20,7 +21,6 @@ namespace MelonBookshelfBlazorApp.Services
             base.SetBearerToken(token);
             StoreToken(token);
         }
-
         public async Task InitializeClientToken()
         {
             var token = await GetToken();
@@ -39,19 +39,6 @@ namespace MelonBookshelfBlazorApp.Services
         public async Task<string> GetToken()
         {
             return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "jwtToken");
-        }
-
-        public static bool IsUserAdmin(string token)
-        {
-            if(token == null)
-            {
-                return false;
-            }
-
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            return jwtToken.Claims.Any(c => c.Value == "Admin");
         }
 
         public void RemoveToken()

@@ -6,11 +6,6 @@ namespace MelonBookshelfApi.Services
 {
     public class EmailSender : IMessageSender
     {
-        private readonly IConfiguration _config;
-        public EmailSender(IConfiguration config)
-        {
-            _config = config;
-        }
         public async Task SendMessage(string to, string content)
         {
 			var message = new MimeMessage();

@@ -1,8 +1,10 @@
 ﻿@page "/borrowed-resources"
+@attribute [Authorize]
 @using System.Collections.Generic
 @using MelonBookshelfBlazorApp.Models;
 @using MelonBookshelfBlazorApp.Services.Fetchers;
 @using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
 @using Newtonsoft.Json;
 @inject NavigationManager _navigationManager
 @inject ResourcesFetcher _resourceFetcher
@@ -51,19 +53,13 @@ else
 	{
 		string token = await _auth.GetToken();
 
-		if (string.IsNullOrEmpty(token))
-		{
-			_navigationManager.NavigateTo("/login");
-		}
-		else
-		{
-			_resourceFetcher.SetBearerToken(token);
+		_resourceFetcher.SetBearerToken(token);
 
-			var response = await _resourceFetcher.Resources();
+		var response = await _resourceFetcher.Resources();
 
-			var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+		var result = JsonConvert.DeserializeObject<List<Resource>>(response);
 
-			resources = result;
-		}
+		resources = result;
+
 	}
 }
