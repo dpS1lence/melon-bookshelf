@@ -1,5 +1,6 @@
 ﻿@page "/hr-dashboard"
 
+
 <h3>Resource Requests</h3>
 
 @if (ResourceRequests != null && ResourceRequests.Any())
@@ -8,7 +9,6 @@
         <thead>
             <tr>
                 <th>Category</th>
-                <th>Type</th>
                 <th>Title</th>
                 <th>Author</th>
                 <th>Official Source Link</th>
@@ -23,7 +23,6 @@
             {
                 <tr>
                     <td>@request.Category</td>
-                    <td>@request.Type</td>
                     <td>@request.Title</td>
                     <td>@request.Author</td>
                     <td>@request.OfficialSourceLink</td>
@@ -52,14 +51,51 @@ else
     <p>No resource requests found.</p>
 }
 
+<h3>Available Resources</h3>
+
+@if (AvailableResources != null && AvailableResources.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resource in AvailableResources)
+            {
+                <tr>
+                    <td>
+                        <h5 class="resource-title">@resource.Title</h5>
+                        <button class="btn btn-primary" @onclick="() => ShowResourceDetails(resource)">Details</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="resource-details" style="display: @(resource.DetailsVisible ? "block" : "none")">
+                            <p><strong>Category:</strong> @resource.Category</p>
+                            <p><strong>Author:</strong> @resource.Author</p>
+                            <p><strong>Status:</strong> @resource.Status</p>
+                            <p><strong>Borrow Date:</strong> @resource.BorrowDate</p>
+                            <p><strong>Expected Return Date:</strong> @resource.ExpectedReturnDate</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No available resources found.</p>
+}
+
 <div class="modal" style="display: @(showRejectionModal ? "block" : "none")">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Reject Request</h5>
-                <button type="button" class="close" data-dismiss="modal" @onclick="HideRejectionModal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -75,16 +111,68 @@ else
     </div>
 </div>
 
+<div class="modal" style="display: @(showAddResourceModal ? "block" : "none")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Resource</h5>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Category" />
+                </div>
+                <div class="form-group">
+                    <label>Title:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Title" />
+                </div>
+                <div class="form-group">
+                    <label>Author:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Author" />
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea class="form-control" @bind="@newResource.Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Official Source Link:</label>
+                    <input type="text" class="form-control" @bind="@newResource.OfficialSourceLink" />
+                </div>
+                <div class="form-group">
+                    <label>Price:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Price" />
+                </div>
+                <div class="form-group">
+                    <label>Invoice:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Invoice" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideAddResourceModal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="AddResource">Add Resource</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-right">
+    <button class="btn btn-primary" @onclick="ShowAddResourceModal">Add New Resource</button>
+</div>
+
 @code {
     private List<ResourceRequest> ResourceRequests { get; set; }
+    private List<Resource> AvailableResources { get; set; }
     private ResourceRequest selectedRequest;
     private bool showRejectionModal = false;
     private string rejectionJustification = "";
+    private bool showAddResourceModal = false;
+    private Resource newResource = new Resource();
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate fetching resource requests from a data source
+        // Simulate fetching resource requests and available resources from a data source
         ResourceRequests = await FetchResourceRequests();
+        AvailableResources = await FetchAvailableResources();
     }
 
     private async Task<List<ResourceRequest>> FetchResourceRequests()
@@ -97,7 +185,6 @@ else
             new ResourceRequest
             {
                 Category = "Category 1",
-                Type = "Type 1",
                 Title = "Title 1",
                 Author = "Author 1",
                 OfficialSourceLink = "https://example.com",
@@ -108,7 +195,6 @@ else
             new ResourceRequest
             {
                 Category = "Category 2",
-                Type = "Type 2",
                 Title = "Title 2",
                 Author = "Author 2",
                 OfficialSourceLink = "https://example.com",
@@ -117,6 +203,35 @@ else
                 Status = "Pending"
             },
             // Add more resource requests as needed
+        };
+    }
+
+    private async Task<List<Resource>> FetchAvailableResources()
+    {
+        // Simulate asynchronous data fetching
+        await Task.Delay(1000);
+
+        return new List<Resource>
+        {
+            new Resource
+            {
+                Category = "Category 1",
+                Author = "Author 1",
+                Title = "Title 1",
+                Status = "Available",
+                BorrowDate = DateTime.Now.AddDays(-7),
+                ExpectedReturnDate = DateTime.Now.AddDays(7)
+            },
+            new Resource
+            {
+                Category = "Category 2",
+                Author = "Author 2",
+                Title = "Title 2",
+                Status = "Available",
+                BorrowDate = DateTime.Now.AddDays(-5),
+                ExpectedReturnDate = DateTime.Now.AddDays(5)
+            },
+            // Add more resources as needed
         };
     }
 
@@ -142,20 +257,59 @@ else
     private void RejectRequest(ResourceRequest request)
     {
         // Perform rejection logic using rejectionJustification value
-        // ...
+        ResourceRequests.Remove(request);
         Console.WriteLine("Request Rejected: " + request.Title + ", Justification: " + rejectionJustification);
         HideRejectionModal();
+    }
+
+    private void ShowResourceDetails(Resource resource)
+    {
+        resource.DetailsVisible = !resource.DetailsVisible;
+        Console.WriteLine("Resource Details: " + resource.Title);
+    }
+
+    private void ShowAddResourceModal()
+    {
+        showAddResourceModal = true;
+    }
+
+    private void HideAddResourceModal()
+    {
+        showAddResourceModal = false;
+        newResource = new Resource();
+    }
+
+    private void AddResource()
+    {
+        // Perform logic to add the new resource using the values in 'newResource'
+        AvailableResources.Add(newResource);
+        Console.WriteLine("New Resource Added: " + newResource.Title);
+        HideAddResourceModal();
     }
 
     public class ResourceRequest
     {
         public string Category { get; set; }
-        public string Type { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public string OfficialSourceLink { get; set; }
         public string User { get; set; }
         public string Justification { get; set; }
         public string Status { get; set; }
+    }
+
+    public class Resource
+    {
+        public string Category { get; set; }
+        public string Author { get; set; }
+        public string Title { get; set; }
+        public string Status { get; set; }
+        public DateTime BorrowDate { get; set; }
+        public DateTime ExpectedReturnDate { get; set; }
+        public string Description { get; set; }
+        public string OfficialSourceLink { get; set; }
+        public decimal Price { get; set; }
+        public string Invoice { get; set; }
+        public bool DetailsVisible { get; set; }
     }
 }

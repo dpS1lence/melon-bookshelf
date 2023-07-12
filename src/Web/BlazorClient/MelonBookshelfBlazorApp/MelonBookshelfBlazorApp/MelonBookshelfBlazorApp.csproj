@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Pages\HR Dashboard.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Pages\HR Dashboard.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazorise" Version="1.2.4" />
     <PackageReference Include="MatBlazor" Version="2.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.19" />
