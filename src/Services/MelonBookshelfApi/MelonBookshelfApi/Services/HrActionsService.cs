@@ -28,6 +28,7 @@ namespace MelonBookshelfApi.Services
 
             request.ConfirmationDate = DateTime.Now;
             request.Status = RequestStatus.Processing.ToString();
+            request.DeliveryStatus = ResourceStatus.Processing.ToString();
 
             _repository.Update(request);
             await _repository.SaveChangesAsync();

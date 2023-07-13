@@ -35,14 +35,29 @@ namespace MelonBookshelfApi.Services
         {
             var request = await _repository.GetByIdAsync<Request>(requestId);
 
-            return _mapper.Map<ResourceRequestDto>(request);
+            var user = await _userManager.FindByIdAsync(request.UserID);
+
+            var map = _mapper.Map<ResourceRequestDto>(request);
+
+            map.UserName = user.UserName;
+
+            return map;
         }
 
         public async Task<IEnumerable<ResourceRequestDto>> GetRequests()
         {
             var request = await _repository.All<Request>().AsNoTracking().ToListAsync();
 
-            return _mapper.Map<IEnumerable<ResourceRequestDto>>(request);
+            var map = _mapper.Map<IEnumerable<ResourceRequestDto>>(request).ToList();
+
+            for (int i = 0; i < request.Count; i++) 
+            {
+                var user = await _userManager.FindByIdAsync(request[i].UserID);
+
+                map[i].UserName = user.UserName;
+            }
+
+            return map;
         }
 
         public async Task<IEnumerable<UserRequestedResourceModel>> GetRequestsByUserId(string userId)
@@ -77,6 +92,7 @@ namespace MelonBookshelfApi.Services
 
                 model.Add(new UserRequestedResourceModel
                 {
+                    Id = item.Id,
                     Author = item.Author,
                     Category = item.Category,
                     Priority = item.Priority,
@@ -126,6 +142,7 @@ namespace MelonBookshelfApi.Services
 
             var resourceRequest = new Request
             {
+                Id = requestDto.Id,
                 Title = requestDto.Title,
                 Type = requestDto.Type,
                 DeliveryStatus = requestDto.DeliveryStatus,

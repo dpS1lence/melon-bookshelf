@@ -1,129 +1,150 @@
 ﻿@page "/hr-dashboard"
+@using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Models.Enums;
 @using MelonBookshelfBlazorApp.Services;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
 @using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.Authorization;
+@using Newtonsoft.Json;
+@using System.Text;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager _navigationManager
+@inject AuthenticationService _authenticationService
+@inject HRActionsFetcher actionsFetcher
+@inject HRDashboardFetcher dashboardFetcher
 
 <h3>Resource Requests</h3>
 
 @if (ResourceRequests != null && ResourceRequests.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Category</th>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Official Source Link</th>
-                <th>User</th>
-                <th>Justification</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var request in ResourceRequests)
-            {
-                <tr>
-                    <td>@request.Category</td>
-                    <td>@request.Title</td>
-                    <td>@request.Author</td>
-                    <td>@request.OfficialSourceLink</td>
-                    <td>@request.User</td>
-                    <td>@request.Justification</td>
-                    <td>
-                        @if (request.Status == "Pending")
-                        {
-                            <button class="btn btn-primary" @onclick="() => ConfirmRequest(request)">Confirm</button>
-                        }
-                        else if (request.Status == "Preparing")
-                        {
-                            <button class="btn btn-success">In Progress</button>
-                        }
-                    </td>
-                    <td>
-                        <button class="btn btn-danger" @onclick="() => ShowRejectionModal(request)">Reject</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Category</th>
+				<th>Title</th>
+				<th>Author</th>
+				<th>Official Source Link</th>
+				<th>User</th>
+				<th>Justification</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var request in ResourceRequests)
+			{
+				if(request.DeliveryStatus == RequestDeliveryStatus.Delivered.ToString() || request.Status == RequestStatus.Declined.ToString())
+				{
+					continue;
+				}
+
+				<tr>
+					<td>@request.Category</td>
+					<td>@request.Title</td>
+					<td>@request.Author</td>
+					<td>@request.Link</td>
+					<td>@request.UserName</td>
+					<td>@request.Justification</td>
+					@if (!string.IsNullOrWhiteSpace(request.DeliveryStatus) || !string.IsNullOrEmpty(request.DeliveryStatus))
+					{
+						if (request.DeliveryStatus == RequestDeliveryStatus.Processing.ToString())
+						{
+							<td>
+								<button class="btn btn-primary" @onclick="() => SetRequestInDelivery(request)">In Delivery</button>
+							</td>
+						}
+						else if (request.DeliveryStatus == RequestDeliveryStatus.InDelivery.ToString())
+						{
+							<td>
+								<button class="btn btn-primary" @onclick="() => SetRequestDelivered(request)">Delivered</button>
+							</td>
+						}
+						else if (request.Status == RequestStatus.PendingReview.ToString())
+						{
+							<td>
+								<button class="btn btn-primary" @onclick="() => ConfirmRequest(request)">Confirm</button>
+								<button class="btn btn-primary" @onclick="() => RejectRequest(request)">Reject</button>
+							</td>
+						}
+					}
+				</tr>
+			}
+		</tbody>
+	</table>
 }
-else if(isLoading)
+else if (isLoading)
 {
-    <p>Loading...</p>
+	<p>Loading...</p>
 }
 else
 {
-    <p>No resource requests found.</p>
+	<p>No resource requests found.</p>
 }
 
 <h3>Available Resources</h3>
 
 @if (AvailableResources != null && AvailableResources.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var resource in AvailableResources)
-            {
-                <tr>
-                    <td>
-                        <h5 class="resource-title">@resource.Title</h5>
-                        <button class="btn btn-primary" @onclick="() => ShowResourceDetails(resource)">Details</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <div class="resource-details" style="display: @(resource.DetailsVisible ? "block" : "none")">
-                            <p><strong>Category:</strong> @resource.Category</p>
-                            <p><strong>Author:</strong> @resource.Author</p>
-                            <p><strong>Status:</strong> @resource.Status</p>
-                            <p><strong>Borrow Date:</strong> @resource.BorrowDate</p>
-                            <p><strong>Expected Return Date:</strong> @resource.ExpectedReturnDate</p>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var resource in AvailableResources)
+			{
+				<tr>
+					<td>
+						<h5 class="resource-title">@resource.Resource.Title</h5>
+						<button class="btn btn-primary" @onclick="() => ShowResourceDetails(resource)">Details</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<div class="resource-details" style="display: @(resource.DetailsVisible ? "block" : "none")">
+							<p><strong>Category:</strong> @resource.Resource.ResourceCategory.Name</p>
+							<p><strong>Author:</strong> @resource.Resource.Author</p>
+							<p><strong>Status:</strong> @resource.Resource.Status</p>
+							<p><strong>InvoiceAttachment:</strong> @resource.Resource.InvoiceAttachment</p>
+							<p><strong>PurchasePrice:</strong> @resource.Resource.PurchasePrice</p>
+						</div>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 else if (isLoading)
 {
-    <p>Loading...</p>
+	<p>Loading...</p>
 }
 else
 {
-    <p>No resource requests found.</p>
+	<p>No resource requests found.</p>
 }
 
 <div class="modal" style="display: @(showRejectionModal ? "block" : "none")">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Reject Request</h5>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Justification:</label>
-                    <textarea class="form-control" @bind="@rejectionJustification"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideRejectionModal">Cancel</button>
-                <button type="button" class="btn btn-danger" @onclick="() => RejectRequest(selectedRequest)">Reject</button>
-            </div>
-        </div>
-    </div>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Reject Request</h5>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label>Justification:</label>
+					<textarea class="form-control" @bind="@justification"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideRejectionModal">Cancel</button>
+				<button type="button" class="btn btn-danger" @onclick="() => RejectRequest(selectedRequest)">Reject</button>
+			</div>
+		</div>
+	</div>
 </div>
 
-<div class="modal" style="display: @(showAddResourceModal ? "block" : "none")">
+@*<div class="modal" style="display: @(showAddResourceModal ? "block" : "none")">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -160,192 +181,133 @@ else
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideAddResourceModal">Cancel</button>
-                <button type="button" class="btn btn-primary" @onclick="AddResource" disabled="@IsAddResourceButtonDisabled()">Add Resource</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideAddInvoiceModal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="AddInvoice" disabled="@IsAddInvoiceButtonDisabled()">Add Resource</button>
             </div>
         </div>
     </div>
-</div>
+</div>*@
 
 
-<div class="text-right">
-    <button class="btn btn-primary" @onclick="ShowAddResourceModal">Add New Resource</button>
-</div>
+@*<div class="text-right">
+    <button class="btn btn-primary" @onclick="ShowAddInvoiceModal">Add New Resource</button>
+</div>*@
 
 @code {
-    private List<ResourceRequest> ResourceRequests { get; set; }
-    private List<Resource> AvailableResources { get; set; }
-    private ResourceRequest selectedRequest;
-    private bool showRejectionModal = false;
-    private string rejectionJustification = "";
-    private bool showAddResourceModal = false;
-    private Resource newResource = new Resource();
-    private bool isUserAdmin = false;
-    private bool isLoading = true;
+	private List<Request> ResourceRequests { get; set; }
+	private List<ResourceViewModel> AvailableResources { get; set; }
+	private Request selectedRequest;
+	private bool showRejectionModal = false;
+	private string justification = "";
+	private bool showAddResourceModal = false;
+	private ResourceViewModel newResource = new ResourceViewModel();
+	private bool isUserAdmin = false;
+	private bool isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        isUserAdmin = AuthenticationManager.IsUserAdmin(state.User.Claims);
+	protected override async Task OnInitializedAsync()
+	{
+		var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		isUserAdmin = AuthenticationManager.IsUserAdmin(state.User.Claims);
 
-        if (!isUserAdmin)
-        {
-            _navigationManager.NavigateTo("/");
-        }
+		var token = await _authenticationService.GetToken();
 
-        // Simulate fetching resource requests and available resources from a data source
-        isLoading = true;
-        ResourceRequests = await FetchResourceRequests();
-        AvailableResources = await FetchAvailableResources();
-        isLoading = false;
-        await InvokeAsync(StateHasChanged);
-    }
+		actionsFetcher.SetBearerToken(token);
+		dashboardFetcher.SetBearerToken(token);
 
-    private async Task<List<ResourceRequest>> FetchResourceRequests()
-    {
-        // Simulate asynchronous data fetching
-        await Task.Delay(1000);
+		if (!isUserAdmin)
+		{
+			_navigationManager.NavigateTo("/");
+		}
 
-        return new List<ResourceRequest>
-        {
-            new ResourceRequest
-            {
-                Category = "Category 1",
-                Title = "Title 1",
-                Author = "Author 1",
-                OfficialSourceLink = "https://example.com",
-                User = "User 1",
-                Justification = "Justification 1",
-                Status = "Pending"
-            },
-            new ResourceRequest
-            {
-                Category = "Category 2",
-                Title = "Title 2",
-                Author = "Author 2",
-                OfficialSourceLink = "https://example.com",
-                User = "User 2",
-                Justification = "Justification 2",
-                Status = "Pending"
-            },
-            // Add more resource requests as needed
-        };
-    }
+		// Simulate fetching resource requests and available resources from a data source
+		isLoading = true;
+		ResourceRequests = await FetchResourceRequests();
+		AvailableResources = await FetchAvailableResources();
+		isLoading = false;
+		await InvokeAsync(StateHasChanged);
+	}
 
-    private async Task<List<Resource>> FetchAvailableResources()
-    {
-        // Simulate asynchronous data fetching
-        await Task.Delay(1000);
+	private async Task<List<Request>> FetchResourceRequests()
+	{
+		// Get the JSON response
+		var jsonResponse = await dashboardFetcher.GetRequests();
 
-        return new List<Resource>
-        {
-            new Resource
-            {
-                Category = "Category 1",
-                Author = "Author 1",
-                Title = "Title 1",
-                Status = "Available",
-                BorrowDate = DateTime.Now.AddDays(-7),
-                ExpectedReturnDate = DateTime.Now.AddDays(7)
-            },
-            new Resource
-            {
-                Category = "Category 2",
-                Author = "Author 2",
-                Title = "Title 2",
-                Status = "Available",
-                BorrowDate = DateTime.Now.AddDays(-5),
-                ExpectedReturnDate = DateTime.Now.AddDays(5)
-            },
-            // Add more resources as needed
-        };
-    }
+		// Deserialize the JSON response to a List of Request
+		var requests = JsonConvert.DeserializeObject<List<Request>>(jsonResponse);
 
-    private void ConfirmRequest(ResourceRequest request)
-    {
-        // Perform confirmation logic
-        request.Status = "Preparing";
-        Console.WriteLine("Request Confirmed: " + request.Title);
-    }
+		return requests;
+	}
 
-    private void ShowRejectionModal(ResourceRequest request)
-    {
-        selectedRequest = request;
-        showRejectionModal = true;
-    }
+	private async Task<List<ResourceViewModel>> FetchAvailableResources()
+	{
+		// Get the JSON response
+		var jsonResponse = await dashboardFetcher.GetAllResourcesForHR();
 
-    private void HideRejectionModal()
-    {
-        showRejectionModal = false;
-        rejectionJustification = "";
-    }
+		// Deserialize the JSON response to a List of Resource
+		var resources = JsonConvert.DeserializeObject<List<Resource>>(jsonResponse);
 
-    private void RejectRequest(ResourceRequest request)
-    {
-        // Perform rejection logic using rejectionJustification value
-        ResourceRequests.Remove(request);
-        Console.WriteLine("Request Rejected: " + request.Title + ", Justification: " + rejectionJustification);
-        HideRejectionModal();
-    }
+		var map = resources.Select(a => new ResourceViewModel { Resource = a, DetailsVisible = false }).ToList();
 
-    private void ShowResourceDetails(Resource resource)
-    {
-        resource.DetailsVisible = !resource.DetailsVisible;
-        Console.WriteLine("Resource Details: " + resource.Title);
-    }
+		return map;
+	}
 
-    private void ShowAddResourceModal()
-    {
-        showAddResourceModal = true;
-    }
+	private async void ConfirmRequest(Request request)
+	{
+		var response = await actionsFetcher.ConfirmRequest(request.Id);
 
-    private void HideAddResourceModal()
-    {
-        showAddResourceModal = false;
-        newResource = new Resource();
-    }
-    private bool IsAddResourceButtonDisabled()
-    {
-        return string.IsNullOrWhiteSpace(newResource.Category) ||
-               string.IsNullOrWhiteSpace(newResource.Title) ||
-               string.IsNullOrWhiteSpace(newResource.Author) ||
-               string.IsNullOrWhiteSpace(newResource.Description) ||
-               string.IsNullOrWhiteSpace(newResource.OfficialSourceLink) ||
-               string.IsNullOrWhiteSpace(newResource.Price.ToString()) ||
-               string.IsNullOrWhiteSpace(newResource.Invoice);
-    }
+		await InvokeAsync(UpadateState);
+	}
 
-    private void AddResource()
-    {
-        // Perform logic to add the new resource using the values in 'newResource'
-        AvailableResources.Add(newResource);
-        Console.WriteLine("New Resource Added: " + newResource.Title);
-        HideAddResourceModal();
-    }
+	private async void SetRequestInDelivery(Request request)
+	{
+		var response = await actionsFetcher.SetRequestInDelivery(request.Id);
 
-    public class ResourceRequest
-    {
-        public string Category { get; set; }
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string OfficialSourceLink { get; set; }
-        public string User { get; set; }
-        public string Justification { get; set; }
-        public string Status { get; set; }
-    }
+		await InvokeAsync(UpadateState);
+	}
 
-    public class Resource
-    {
-        public string Category { get; set; }
-        public string Author { get; set; }
-        public string Title { get; set; }
-        public string Status { get; set; }
-        public DateTime BorrowDate { get; set; }
-        public DateTime ExpectedReturnDate { get; set; }
-        public string Description { get; set; }
-        public string OfficialSourceLink { get; set; }
-        public decimal Price { get; set; }
-        public string Invoice { get; set; }
-        public bool DetailsVisible { get; set; }
-    }
+	private async void SetRequestDelivered(Request request)
+	{
+		var response = await actionsFetcher.SetRequestDelivered(request.Id);
+
+		await InvokeAsync(UpadateState);
+	}
+
+	private async void RejectRequest(Request request)
+	{
+		// Serialize request to JSON
+		var jsonContent = JsonConvert.SerializeObject(justification);
+		var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+		// Send a request to reject
+		var response = await actionsFetcher.RejectRequest(request.Id, content);
+
+		HideRejectionModal();
+
+		await InvokeAsync(UpadateState);
+	}
+
+	private void ShowRejectionModal(Request request)
+	{
+		selectedRequest = request;
+		showRejectionModal = true;
+	}
+
+	private void HideRejectionModal()
+	{
+		showRejectionModal = false;
+		justification = "";
+	}
+
+	private void ShowResourceDetails(ResourceViewModel resource)
+	{
+		resource.DetailsVisible = !resource.DetailsVisible;
+	}
+
+	private async Task UpadateState()
+	{
+		ResourceRequests = await FetchResourceRequests();
+		AvailableResources = await FetchAvailableResources();
+
+		await InvokeAsync(StateHasChanged);
+	}
 }

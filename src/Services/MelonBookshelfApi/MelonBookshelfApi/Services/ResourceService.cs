@@ -164,6 +164,7 @@ namespace MelonBookshelfApi.Services
 
                 serachResultCollection.Add(new ResourceModel
                 {
+                    Id = item.Id,
                     Type = item.Type.ToString(),
                     Title = item.Title,
                     Author = item.Author,

@@ -2,6 +2,7 @@
 {
     public class UserRequestedResourceModel
     {
+        public int Id { get; set; }
         public string Status { get; set; } = null!;
 
         public string DeliveryStatus { get; set; }

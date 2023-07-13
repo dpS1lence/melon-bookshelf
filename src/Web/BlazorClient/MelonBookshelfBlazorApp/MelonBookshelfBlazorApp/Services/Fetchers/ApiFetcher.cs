@@ -1,5 +1,6 @@
 ﻿using MelonBookshelfBlazorApp.ApiEndpoints;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace MelonBookshelfBlazorApp.Services.Fetchers
 {
@@ -40,6 +41,13 @@ namespace MelonBookshelfBlazorApp.Services.Fetchers
         protected async Task<string> PutAsync(string endpoint, HttpContent content)
         {
             var response = await httpClient.PutAsync(baseAddres + endpoint, content);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        protected async Task<string> PutAsync(string endpoint)
+        {
+            var response = await httpClient.PutAsJsonAsync(baseAddres + endpoint, new {});
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }

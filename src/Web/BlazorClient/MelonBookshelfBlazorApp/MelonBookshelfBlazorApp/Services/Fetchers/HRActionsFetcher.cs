@@ -5,19 +5,19 @@
         public HRActionsFetcher(HttpClient httpClient) : base(httpClient)
         { }
 
-        public Task<string> ConfirmRequest(string requestId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.ConfirmRequest, requestId), content);
+        public Task<string> ConfirmRequest(int requestId)
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.ConfirmRequest, requestId));
 
-        public Task<string> RejectRequest(string requestId, HttpContent content)
+        public Task<string> RejectRequest(int requestId, HttpContent content)
             => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.RejectRequest, requestId), content);
 
-        public Task<string> SetResourceInProgress(string resourceId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestInProgress, resourceId), content);
+        public Task<string> SetRequestInProgress(int resourceId)
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestInProgress, resourceId));
 
-        public Task<string> SetResourceInDelivery(string resourceId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestInDelivery, resourceId), content);
+        public Task<string> SetRequestInDelivery(int resourceId)
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestInDelivery, resourceId));
 
-        public Task<string> SetResourceDelivered(string resourceId, HttpContent content)
-            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestDelivered, resourceId), content);
+        public Task<string> SetRequestDelivered(int resourceId)
+            => PutAsync(string.Format(ApiEndpoints.ApiEndpoints.HRActions.SetRequestDelivered, resourceId));
     }
 }
