@@ -89,14 +89,14 @@
 					<td>@request.Priority</td>
 					<td>@request.UpvotersCount</td>
 					<td>@request.FollowersCount</td>
-@*					<td>
-						<button class="upvote-button @(request.UpvotersCollection ? "upvoted" : "")" @onclick="() => ToggleUpvote(request)">@((request.IsUpvoted ? "Upvote" : "Upvote"))</button>
+					<td>
+						<button class="upvote-button" @onclick="() => ToggleUpvote(request.Id)">Upvote</button>
 					</td>
 					<td>
-						<button class="like-button @(request.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(request)">
+						<button class="like-button" @onclick="() => ToggleLike(request.Id)">
 							<i class="fas fa-thumbs-up"></i>
 						</button>
-					</td>*@
+					</td>
 				</tr>
 			}
 		</tbody>
@@ -250,9 +250,9 @@ else
 		return requests;
 	}
 
-	private async Task ToggleUpvote(Request request)
+	private async Task ToggleUpvote(int requestid)
 	{
-		await _actionsFetcher.UpvoteRequest(request.Id, uId);
+		await _actionsFetcher.UpvoteRequest(requestid, uId);
 
 		AllRequests = await FetchResourceRequests();
 		UsersRequests = await FetchResourceRequestsByUser();
@@ -260,9 +260,9 @@ else
 		await InvokeAsync(StateHasChanged);
 	}
 
-	private async Task ToggleLike(Request request)
+	private async Task ToggleLike(int requestid)
 	{
-		await _actionsFetcher.FollowRequest(request.Id, uId);
+		await _actionsFetcher.FollowRequest(requestid, uId);
 
 		AllRequests = await FetchResourceRequests();
 		UsersRequests = await FetchResourceRequestsByUser();

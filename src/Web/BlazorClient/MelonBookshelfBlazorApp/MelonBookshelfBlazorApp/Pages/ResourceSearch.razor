@@ -14,6 +14,7 @@
 @inject ResourcesFetcher _resourceFetcher
 @inject AuthenticationService _auth
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserActionsFetcher _userActionsFetcher
 
 <div class="container mt-5">
     <div class="row">
@@ -81,7 +82,10 @@
                                 <td>@result.Author</td>
                                 <td>@result.Status</td>
                                 <td>@result.DateAdded.ToString("yyyy-MM-dd")</td>
-                                <td><button class="btn btn-success" @onclick="() => BorrowResource(result)">Borrow Resource</button></td>
+                                @if (result.Type == "Book" && result.Status == "Avalable")
+                                {
+                                    <td><button class="btn btn-success" @onclick="() => BorrowResource(result)">Borrow Resource</button></td>
+                                }
                             </tr>
                         }
                     }
@@ -167,8 +171,14 @@
 
     private async Task BorrowResource(Resource resource)
     {
-        // Implement borrowing resource logic here
-        // You can navigate to a borrow resource page or perform any other actions required for borrowing
-        // You can pass the resource data to the next page/component if needed
+        string uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
+
+        _userActionsFetcher.SetBearerToken(token);
+
+        await _userActionsFetcher.GetPhysicalResource(resource.Id, uId);
+
+        await InvokeAsync(GetResources);
+
+        await InvokeAsync(StateHasChanged);
     }
 }

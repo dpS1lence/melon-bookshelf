@@ -13,7 +13,7 @@ using IResourceService = MelonBookshelfApi.Services.Contracts.IResourceService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DockerConnection");
 builder.Services.AddDbContext<BookshelfDbContext>(options =>
     options.UseSqlServer(connectionString)
 );

@@ -11,6 +11,7 @@
 @inject ResourcesFetcher _resourceFetcher
 @inject AuthenticationService _auth
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserActionsFetcher _userActionsFetcher
 
 <h3>Borrowed Resources</h3>
 
@@ -72,17 +73,16 @@ else
 
     private async Task ReturnResource(Resource resource)
     {
-        //// Perform the necessary actions to return the resource
-        //Console.WriteLine("Returning resource: " + resource.Title);
+        string token = await _auth.GetToken();
+        string uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
 
-        //// Update the resource status or perform other actions as needed
-        //resource.Status = ResourceStatus.Available;
+        _userActionsFetcher.SetBearerToken(token);
 
-        //// Send a request to the server to update the resource status
-        //await _resourceFetcher.UpdateResource(resource);
+        await _userActionsFetcher.ReturnPhysicalResource(resource.Id, uId);
 
-        //// Refresh the list of borrowed resources
-        //await LoadBorrowedResources();
+        await InvokeAsync(LoadBorrowedResources);
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadBorrowedResources()

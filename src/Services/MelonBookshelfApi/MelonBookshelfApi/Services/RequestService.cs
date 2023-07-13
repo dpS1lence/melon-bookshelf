@@ -94,7 +94,7 @@ namespace MelonBookshelfApi.Services
                     .ToList();
 
                 var upvotersCollection = _repository
-                    .All<RequestFollower>()
+                    .All<RequestUpvoter>()
                     .AsNoTracking()
                     .Where(a => a.RequestId == item.Id)
                     .Include(a => a.IdentityUser)
@@ -134,7 +134,7 @@ namespace MelonBookshelfApi.Services
                     .ToList();
 
                 var upvotersCollection = _repository
-                    .All<RequestFollower>()
+                    .All<RequestUpvoter>()
                     .AsNoTracking()
                     .Where(a => a.RequestId == item.Id)
                     .Include(a => a.IdentityUser)
@@ -211,8 +211,6 @@ namespace MelonBookshelfApi.Services
 
             await _repository.AddAsync(resourceRequest);
             await _repository.SaveChangesAsync();
-
-            await _messageSender.SendMessage(user.Email, $"Request Approved - Your request for {resourceRequest.Title} has been approved!");
 
             return new ProcessRequestResult { ProcessRequest = ProcessRequest.RequestProcessedSuccessfuly };
         }

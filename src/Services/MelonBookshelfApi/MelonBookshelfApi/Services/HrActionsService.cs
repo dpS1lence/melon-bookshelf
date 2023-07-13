@@ -2,7 +2,9 @@
 using MelonBookchelfApi.Infrastructure.Data.Models.Enums;
 using MelonBookchelfApi.Infrastructure.Repositories;
 using MelonBookshelfApi.CustomObjects.Enums;
+using MelonBookshelfApi.ResponceModels;
 using MelonBookshelfApi.Services.Contracts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ResourceStatus = MelonBookshelfApi.CustomObjects.Enums.ResourceStatus;
 
@@ -11,10 +13,14 @@ namespace MelonBookshelfApi.Services
     public class HrActionsService : IHrActionsService
     {
         private readonly IRepository _repository;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IMessageSender _messageSender;
 
-        public HrActionsService(IRepository repository)
+        public HrActionsService(UserManager<IdentityUser> userManager, IRepository repository, IMessageSender messageSender)
         {
             _repository = repository;
+			_messageSender = messageSender;
+            _userManager = userManager;
         }
 
         public async Task Confirm(int requestId)
@@ -26,11 +32,15 @@ namespace MelonBookshelfApi.Services
                 throw new ArgumentException(null, nameof(requestId));
             }
 
-            request.ConfirmationDate = DateTime.Now;
+            var user = await _userManager.FindByIdAsync(request.UserID);
+
+			request.ConfirmationDate = DateTime.Now;
             request.Status = RequestStatus.Processing.ToString();
             request.DeliveryStatus = ResourceStatus.Processing.ToString();
 
-            _repository.Update(request);
+			await _messageSender.SendMessage(user.Email, $"Request Approved - Your request for {request.Title} has been approved!");
+
+			_repository.Update(request);
             await _repository.SaveChangesAsync();
         }
 
@@ -47,7 +57,11 @@ namespace MelonBookshelfApi.Services
             request.Status = RequestStatus.Declined.ToString();
             request.Justification = justification;
 
-            _repository.Update(request);
+			var user = await _userManager.FindByIdAsync(request.UserID);
+
+			await _messageSender.SendMessage(user.Email, $"Request Declined - Your request for {request.Title} has been declined!");
+
+			_repository.Update(request);
             await _repository.SaveChangesAsync();
         }
 

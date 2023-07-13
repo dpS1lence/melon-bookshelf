@@ -4,6 +4,7 @@ namespace MelonBookshelfBlazorApp.Models
 {
     public class Resource
     {
+        public int Id { get; set; }
         public string Type { get; set; } = default!;
 
         public string Title { get; set; } = default!;
