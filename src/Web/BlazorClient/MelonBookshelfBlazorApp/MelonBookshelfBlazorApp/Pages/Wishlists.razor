@@ -20,174 +20,169 @@
 @inject ResourcesFetcher _resourceFetcher
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
 
-<h3>Your Requests</h3>
-
-<table class="table">
-	<thead>
-		<tr>
-			<th>Status</th>
-			<th>Category</th>
-			<th>Author</th>
-			<th>Title</th>
-			<th>Priority</th>
-			<th>Upvotes</th>
-			<th>Likes</th> <!-- Add Likes column -->
-			<th></th>
-			<th></th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var request in UsersRequests)
-		{
-			<tr>
-				<td>@request.Status</td>
-				<td>@request.Category</td>
-				<td>@request.Author</td>
-				<td>@request.Title</td>
-				<td>@request.Priority</td>
-				@*					<td>
-			<button class="upvote-button @(request.UpvotersCollection ? "upvoted" : "")" @onclick="() => ToggleUpvote(request)">@((request.IsUpvoted ? "Upvote" : "Upvote"))</button>
-			</td>
-			<td>
-			<button class="like-button @(request.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(request)">
-			<i class="fas fa-thumbs-up"></i>
-			</button>
-			</td>*@
-			</tr>
-		}
-	</tbody>
-</table>
-
-<h3>All Requests</h3>
-
-@if (AllRequests != null && AllRequests.Any())
-{
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Status</th>
-				<th>Category</th>
-				<th>Author</th>
-				<th>Title</th>
-				<th>Priority</th>
-				<th>Upvotes</th>
-				<th>Likes</th> <!-- Add Likes column -->
-				<th></th>
-				<th></th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var request in AllRequests.Where(a => a.DeliveryStatus != RequestDeliveryStatus.Delivered.ToString() && a.Status != RequestStatus.Declined.ToString()))
-			{
-				<tr>
-					<td>@request.Status</td>
-					<td>@request.Category</td>
-					<td>@request.Author</td>
-					<td>@request.Title</td>
-					<td>@request.Priority</td>
-					<td>@request.UpvotersCount</td>
-					<td>@request.FollowersCount</td>
-					<td>
-						<button class="upvote-button" @onclick="() => ToggleUpvote(request.Id)">Upvote</button>
-					</td>
-					<td>
-						<button class="like-button" @onclick="() => ToggleLike(request.Id)">
-							<i class="fas fa-thumbs-up"></i>
-						</button>
-					</td>
-				</tr>
-			}
-		</tbody>
-	</table>
-
-	<button class="add-request-button" @onclick="ShowAddRequestModal">Add New Request</button>
-
-	@if (showAddRequestModal)
-	{
-		<div class="add-request-modal-overlay">
-			<div class="add-request-modal">
-				<h4>Add New Request</h4>
-				<EditForm Model="@newRequest" OnValidSubmit="AddRequest">
-					<DataAnnotationsValidator />
-
-					<div class="form-group">
-						<label>Category</label>
-						<InputSelect class="form-control" @bind-Value="@newRequest.Category" required>
-							@foreach (var category in Categories)
-							{
-								<option value="@category">@category</option>
-							}
-						</InputSelect>
-						<ValidationMessage For="@(() => newRequest.Category)" />
-					</div>
-
-					<div class="form-group">
-						<label>Type</label>
-						<InputSelect class="form-control" @bind-Value="@newRequest.Type" required>
-							<option value="Video">Video</option>
-							<option value="Audio">Audio</option>
-							<option value="Book">Book</option>
-							<option value="Cource">Cource</option>
-						</InputSelect>
-						<ValidationMessage For="@(() => newRequest.Type)" />
-					</div>
-
-					<div class="form-group">
-						<label>Priority</label>
-						<InputSelect class="form-control" @bind-Value="@newRequest.Priority" required>
-							<option value="Low">Low</option>
-								<option value="Mid">Mid</option>
-								<option value="High">High</option>
-						</InputSelect>
-						<ValidationMessage For="@(() => newRequest.Priority)" />
-					</div>
-
-					<div class="form-group">
-						<label>Title</label>
-						<InputText class="form-control" @bind-Value="@newRequest.Title" required />
-						<ValidationMessage For="@(() => newRequest.Title)" />
-					</div>
-
-					<div class="form-group">
-						<label>Author</label>
-						<InputText class="form-control" @bind-Value="@newRequest.Author" required />
-						<ValidationMessage For="@(() => newRequest.Author)" />
-					</div>
-
-					<div class="form-group">
-						<label>Description</label>
-						<InputTextArea class="form-control" @bind-Value="@newRequest.Description" required />
-						<ValidationMessage For="@(() => newRequest.Description)" />
-					</div>
-
-					<div class="form-group">
-						<label>Official Source Link</label>
-						<InputText class="form-control" @bind-Value="@newRequest.Link" required />
-						<ValidationMessage For="@(() => newRequest.Link)" />
-					</div>
-
-					<div class="form-group">
-						<label>Justification</label>
-						<InputTextArea class="form-control" @bind-Value="@newRequest.Justification" required />
-						<ValidationMessage For="@(() => newRequest.Justification)" />
-					</div>
-
-					<div class="edit-menu-buttons">
-						<button type="submit" class="btn btn-primary">Add</button>
-						<button class="cancel-button" @onclick="HideAddRequestModal">Cancel</button>
-					</div>
-				</EditForm>
-			</div>
+<div class="container mt-5">
+	<div class="row">
+		<div class="col-lg-12">
+			<h3>Your Requests</h3>
+			<button class="add-request-button" @onclick="ShowAddRequestModal">Add New Request</button>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Status</th>
+						<th>Category</th>
+						<th>Author</th>
+						<th>Title</th>
+						<th>Priority</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var request in UsersRequests)
+					{
+						<tr>
+							<td>@request.Status</td>
+							<td>@request.Category</td>
+							<td>@request.Author</td>
+							<td>@request.Title</td>
+							<td>@request.Priority</td>
+						</tr>
+					}
+				</tbody>
+			</table>
 		</div>
-	}
-}
-else
-{
-	<p>No requests found.</p>
-}
+	</div>
+</div>
 
+<div class="container mt-5">
+	<div class="row">
+		<div class="col-lg-12">
+			<h3>All Requests</h3>
+
+			@if (AllRequests != null && AllRequests.Any())
+			{
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Status</th>
+							<th>Category</th>
+							<th>Author</th>
+							<th>Title</th>
+							<th>Priority</th>
+							<th>Upvotes</th>
+							<th>Likes</th> <!-- Add Likes column -->
+							<th></th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var request in AllRequests.Where(a => a.DeliveryStatus != RequestDeliveryStatus.Delivered.ToString() && a.Status != RequestStatus.Declined.ToString()))
+						{
+							<tr>
+								<td>@request.Status</td>
+								<td>@request.Category</td>
+								<td>@request.Author</td>
+								<td>@request.Title</td>
+								<td>@request.Priority</td>
+								<td>@request.UpvotersCount</td>
+								<td>@request.FollowersCount</td>
+								<td>
+									<button class="upvote-button" @onclick="() => ToggleUpvote(request.Id)">Upvote</button>
+								</td>
+								<td>
+									<button class="like-button" @onclick="() => ToggleLike(request.Id)">
+										<i class="fas fa-thumbs-up"></i>
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			else
+			{
+				<p>No requests found.</p>
+			}
+			@if (showAddRequestModal)
+			{
+				<div class="add-request-modal-overlay">
+					<div class="add-request-modal">
+						<h4>Add New Request</h4>
+						<EditForm Model="@newRequest" OnValidSubmit="AddRequest">
+							<DataAnnotationsValidator />
+
+							<div class="form-group">
+								<label>Category</label>
+								<InputSelect class="form-control" @bind-Value="@newRequest.Category" required>
+									@foreach (var category in Categories)
+									{
+										<option value="@category">@category</option>
+									}
+								</InputSelect>
+								<ValidationMessage For="@(() => newRequest.Category)" />
+							</div>
+
+							<div class="form-group">
+								<label>Type</label>
+								<InputSelect class="form-control" @bind-Value="@newRequest.Type" required>
+									<option value="Video">Video</option>
+									<option value="Audio">Audio</option>
+									<option value="Book">Book</option>
+									<option value="Cource">Cource</option>
+								</InputSelect>
+								<ValidationMessage For="@(() => newRequest.Type)" />
+							</div>
+
+							<div class="form-group">
+								<label>Priority</label>
+								<InputSelect class="form-control" @bind-Value="@newRequest.Priority" required>
+									<option value="Low">Low</option>
+									<option value="Mid">Mid</option>
+									<option value="High">High</option>
+								</InputSelect>
+								<ValidationMessage For="@(() => newRequest.Priority)" />
+							</div>
+
+							<div class="form-group">
+								<label>Title</label>
+								<InputText class="form-control" @bind-Value="@newRequest.Title" required />
+								<ValidationMessage For="@(() => newRequest.Title)" />
+							</div>
+
+							<div class="form-group">
+								<label>Author</label>
+								<InputText class="form-control" @bind-Value="@newRequest.Author" required />
+								<ValidationMessage For="@(() => newRequest.Author)" />
+							</div>
+
+							<div class="form-group">
+								<label>Description</label>
+								<InputTextArea class="form-control" @bind-Value="@newRequest.Description" required />
+								<ValidationMessage For="@(() => newRequest.Description)" />
+							</div>
+
+							<div class="form-group">
+								<label>Official Source Link</label>
+								<InputText class="form-control" @bind-Value="@newRequest.Link" required />
+								<ValidationMessage For="@(() => newRequest.Link)" />
+							</div>
+
+							<div class="form-group">
+								<label>Justification</label>
+								<InputTextArea class="form-control" @bind-Value="@newRequest.Justification" required />
+								<ValidationMessage For="@(() => newRequest.Justification)" />
+							</div>
+
+							<div class="edit-menu-buttons">
+								<button type="submit" class="btn btn-primary" style=" background-color: #7fb64b;  border: none;">Add</button>
+								<button class="cancel-button" @onclick="HideAddRequestModal">Cancel</button>
+							</div>
+						</EditForm>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+</div>
 @code {
 	private List<RequestWithFollows> AllRequests { get; set; } = new();
 	private List<Request> UsersRequests { get; set; } = new();
@@ -270,14 +265,22 @@ else
 		await InvokeAsync(StateHasChanged);
 	}
 
-	private void ShowAddRequestModal()
+	private async Task ShowAddRequestModal()
 	{
 		showAddRequestModal = true;
+
+		Console.WriteLine("asdasd");
+
+		await InvokeAsync(StateHasChanged);
+
 	}
 
-	private void HideAddRequestModal()
+	private async Task HideAddRequestModal()
 	{
 		showAddRequestModal = false;
+
+		await InvokeAsync(StateHasChanged);
+
 	}
 
 	private async Task AddRequest()
@@ -304,7 +307,7 @@ else
 
 		AllRequests = await FetchResourceRequests();
 		UsersRequests = await FetchResourceRequestsByUser();
-		
+
 		await InvokeAsync(StateHasChanged);
 	}
 }

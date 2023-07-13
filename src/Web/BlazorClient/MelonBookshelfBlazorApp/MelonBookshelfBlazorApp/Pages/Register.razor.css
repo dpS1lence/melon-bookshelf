@@ -1,70 +1,52 @@
-﻿.registration-form {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+﻿.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10%;
+}
+
+.registration-form {
+    width: 300px;
+    padding: 16px;
     background-color: #fff;
+    box-shadow: 0px 0px 25px 0px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1em;
 }
 
-label {
-    font-weight: bold;
-}
+    .form-group label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 0.5em;
+    }
 
 .form-control {
     width: 100%;
-    padding: 8px;
-    font-size: 16px;
+    padding: 0.5em;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    border: 1px solid #ccc;
 }
 
-.btn-primary {
-    display: block;
+.btn-login, .btn-register {
     width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007bff;
+    padding: 0.5em;
     border: none;
-    border-radius: 4px;
+    background-color: #7fb64b;
+    color: white;
     cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 0.5em;
 }
+
+    .btn-login:hover, .btn-register:hover {
+        background-color: #7fb64b;
+    }
 
 .login-register-container {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.btn-login {
-    display: block;
-    width: 150px;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #6c757d;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 10px; /* Add margin-right for spacing */
-}
-
-.btn-register {
-    display: block;
-    width: 150px;
-    padding: 10px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }

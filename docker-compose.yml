@@ -1,0 +1,25 @@
+version: '3.4'
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Passw0rd!"
+    ports:
+      - "1433:1433"
+      
+  api:
+    build:
+      context: ./src/Services/MelonBookshelfApi
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+
+  client:
+    build:
+      context: ./src/Web/BlazorClient/MelonBookshelfBlazorApp/MelonBookshelfBlazorApp
+      dockerfile: Dockerfile
+    ports:
+      - "5001:80"
+
+

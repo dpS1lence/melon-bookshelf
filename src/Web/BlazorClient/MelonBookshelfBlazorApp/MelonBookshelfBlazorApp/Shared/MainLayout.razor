@@ -4,14 +4,17 @@
 @inject AuthenticationStateProvider _authenticationStateProvider
 
 <div class="page">
-	<div class="sidebar">
+    <div style="background-image:linear-gradient(180deg, hsla(91, 42%, 50%, 1) 0%, hsla(225, 7%, 22%, 1) 100%);background-color:linear-gradient(to right, #000000, #7fb64b, #35373d);" class="sidebar">
 		<NavMenu />
 	</div>
 
 	<main>
-		<div class="top-row px-4">
-			<span>@userName</span>
-		</div>
+		@if (AuthenticationManager.IsAuthenticated)
+		{
+			<div class="top-row px-4">
+				<span>@userName</span>
+			</div>
+		}
 
 		<article class="content px-4">
 			@Body
@@ -20,10 +23,39 @@
 </div>
 
 @code {
-	private string userName = string.Empty;
+    private string userName = string.Empty;
+    AuthenticationState state = default!;
 
-	protected override async Task OnInitializedAsync()
-	{
-		userName = await AuthenticationManager.GetUserName(_authenticationStateProvider);
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitializedAsync();
+        state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        await UpdateUserName();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        await UpdateUserName();
+    }
+
+    private async Task UpdateUserName()
+    {
+        userName = await GetUser();
+    }
+
+    private async Task<string> GetUser()
+    {
+        if (state.User.Identity.IsAuthenticated)
+        {
+            return "Logged as " + await AuthenticationManager.GetUserName(_authenticationStateProvider);
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
 }
+
+
+
