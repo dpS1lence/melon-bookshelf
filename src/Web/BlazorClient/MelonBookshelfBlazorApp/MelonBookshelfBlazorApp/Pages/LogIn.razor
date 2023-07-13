@@ -15,20 +15,22 @@
 
 <PageTitle>LogIn</PageTitle>
 
-<div class="login-container">
-	<h3>Login</h3>
+<div class="center-container">
+	<div class="login-container">
+		<h3>Login</h3>
 
-	<div class="form-group">
-		<label for="email">Email:</label>
-		<input type="email" id="email" class="form-control" @bind="loginModel.Email" />
+		<div class="form-group">
+			<label for="email">Email:</label>
+			<input type="email" id="email" class="form-control" @bind="loginModel.Email" />
+		</div>
+
+		<div class="form-group">
+			<label for="password">Password:</label>
+			<input type="password" id="password" class="form-control" @bind="loginModel.Password" />
+		</div>
+
+		<button type="button" class="btn-login" @onclick="HandleLogin">Login</button>
 	</div>
-
-	<div class="form-group">
-		<label for="password">Password:</label>
-		<input type="password" id="password" class="form-control" @bind="loginModel.Password" />
-	</div>
-
-	<button type="button" class="btn-login" @onclick="HandleLogin">Login</button>
 </div>
 
 @code {

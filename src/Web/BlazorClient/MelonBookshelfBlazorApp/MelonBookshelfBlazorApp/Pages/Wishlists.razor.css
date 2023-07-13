@@ -1,6 +1,6 @@
 ﻿/* Styles for table, buttons, etc. */
 .upvote-button {
-    background-color: #007bff;
+    background-color: #7fb64b;
     color: #fff;
     padding: 6px 12px;
     border: none;
@@ -9,7 +9,7 @@
 }
 
     .upvote-button.upvoted {
-        background-color: #28a745;
+        background-color: #7fb64b;
     }
 
 .like-button {
@@ -55,7 +55,7 @@
 }
 
 .add-request-button {
-    background-color: #28a745;
+    background-color: #7fb64b;
     color: #fff;
     padding: 6px 12px;
     border: none;

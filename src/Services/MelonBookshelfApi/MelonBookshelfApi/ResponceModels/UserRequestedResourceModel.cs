@@ -9,10 +9,12 @@
         public string DeliveryStatus { get; set; }
 
         public string Category { get; set; } = null!;
+        public string JustifiCation { get; set; } = null!;
 
         public string Author { get; set; } = null!;
 
         public string Title { get; set; } = null!;
+        public string Link { get; set; } = null!;
 
         public string Priority { get; set; } = null!;
 

@@ -80,7 +80,7 @@ namespace MelonBookshelfBlazorApp.Services
 				{
 					if (claim.Value.Contains('@'))
 					{
-						return claim.Value;
+						return claim.Value.Split('@').First();
 
 					}
 				}

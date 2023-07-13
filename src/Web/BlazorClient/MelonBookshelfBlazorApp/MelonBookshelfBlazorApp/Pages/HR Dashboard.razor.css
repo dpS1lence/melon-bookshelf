@@ -22,21 +22,21 @@
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: #7fb64b;
     color: #fff;
 }
 
     .btn-primary:hover {
-        background-color: #0069d9;
+        background-color: #7fb64b;
     }
 
 .btn-success {
-    background-color: #28a745;
+    background-color: #7fb64b;
     color: #fff;
 }
 
     .btn-success:hover {
-        background-color: #218838;
+        background-color: #7fb64b;
     }
 
 .btn-danger {
