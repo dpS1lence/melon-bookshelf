@@ -13,5 +13,8 @@
 
         public Task<string> GetRequestById(string requestId)
             => GetAsync(string.Format(ApiEndpoints.ApiEndpoints.RequestsData.GetRequestById, requestId));
-    }
+
+		public Task<string> GetAll()
+			=> GetAsync(string.Format(ApiEndpoints.ApiEndpoints.RequestsData.GetAll));
+	}
 }

@@ -9,7 +9,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
 {
     [ApiController]
     [Route("api")]
-    [AllowAnonymous]
+    [Authorize]
     public class RequestsController : Controller
     {
         private readonly IRequestService _requestService;
@@ -52,7 +52,16 @@ namespace MelonBookshelfApi.Controllers.BaseUser
             return Ok(result);
         }
 
-        [HttpGet]
+		[HttpGet]
+		[Route("requests")]
+		public async Task<IActionResult> GetRequests()
+		{
+			var result = await _requestService.GetRequests();
+
+			return Ok(result);
+		}
+
+		[HttpGet]
         [Route("requests/{requestId}")]
         public async Task<IActionResult> GetRequestById(int requestId)
         {

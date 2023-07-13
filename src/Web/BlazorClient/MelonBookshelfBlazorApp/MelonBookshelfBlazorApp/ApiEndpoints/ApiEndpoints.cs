@@ -37,6 +37,7 @@
             public static string AddRequest { get => "requests/create"; }
             public static string GetRequestsByUserId { get => "requests/{0}/get-by-userid"; }
             public static string GetRequestById { get => "requests/{0}"; }
+            public static string GetAll { get => "requests"; }
         }
 
         public static class ResourcesData
