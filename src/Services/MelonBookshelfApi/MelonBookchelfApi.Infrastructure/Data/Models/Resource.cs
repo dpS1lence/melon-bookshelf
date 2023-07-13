@@ -13,7 +13,7 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
     public class Resource : Model
     {
         [Required]
-        public ResourceType Type { get; set; }
+        public string Type { get; set; }
 
         [ForeignKey(nameof(ResourceCategory))]
         public int CategoryID { get; set; }
@@ -35,7 +35,7 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
 
         public DateTime DateAdded { get; set; }
 
-        public decimal PurchasePrice { get; set; }
+        public double PurchasePrice { get; set; }
 
         public string? InvoiceAttachment { get; set; }
 

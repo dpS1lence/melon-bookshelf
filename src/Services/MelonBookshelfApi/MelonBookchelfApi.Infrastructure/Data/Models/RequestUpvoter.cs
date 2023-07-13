@@ -13,11 +13,11 @@ namespace MelonBookchelfApi.Infrastructure.Data.Models
         [ForeignKey(nameof(IdentityUser))]
         public string UserID { get; set; } = null!;
 
-        [ForeignKey(nameof(Resource))]
-        public int ResourceID { get; set; }
+        [ForeignKey(nameof(Request))]
+        public int RequestId { get; set; }
 
         public IdentityUser IdentityUser { get; set; } = null!;
 
-        public Resource Resource { get; set; } = null!;
+        public Request Request { get; set; } = null!;
     }
 }

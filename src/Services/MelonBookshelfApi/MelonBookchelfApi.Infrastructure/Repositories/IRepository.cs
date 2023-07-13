@@ -15,11 +15,13 @@ namespace MelonBookchelfApi.Infrastructure.Repositories
         /// <returns>Queryable expression tree</returns>
         IQueryable<T> All<T>() where T : class;
 
-        /// <summary>
-        /// All records in a table
-        /// </summary>
-        /// <returns>Queryable expression tree</returns>
-        IQueryable<T> All<T>(Expression<Func<T, bool>> search) where T : class;
+        Task DeleteAsync<T>(params object[] keyValues) where T : class;
+
+		/// <summary>
+		/// All records in a table
+		/// </summary>
+		/// <returns>Queryable expression tree</returns>
+		IQueryable<T> All<T>(Expression<Func<T, bool>> search) where T : class;
 
         /// <summary>
         /// The result collection won't be tracked by the context

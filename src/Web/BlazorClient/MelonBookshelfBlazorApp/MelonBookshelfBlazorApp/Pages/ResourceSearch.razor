@@ -1,0 +1,184 @@
+﻿@page "/resource-search"
+@attribute [Authorize]
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Services;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using Newtonsoft.Json;
+@using System.Text;
+@inject NavigationManager _navigationManager
+@inject ResourcesFetcher _resourceFetcher
+@inject AuthenticationService _auth
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserActionsFetcher _userActionsFetcher
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="mb-4">Resource Search</h3>
+            <div class="form-inline mb-4 row">
+                <div class="form-group col-md-2">
+                    <label for="resourceType" class="mr-2">Type:</label>
+                    <select id="resourceType" class="form-control" @bind="@SearchRequestModel.Type">
+                        <option value="">All</option>
+                        <option value="Video">Video</option>
+                        <option value="Audio">Audio</option>
+                        <option value="Book">Book</option>
+                        <option value="Course">Course</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="category" class="mr-2">Category:</label>
+                    <select id="category" class="form-control" @bind="@SearchRequestModel.Category">
+                        <option value="">All</option>
+                        @foreach (var category in Categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="title" class="mr-2">Title:</label>
+                    <input type="text" id="title" class="form-control" @bind="@SearchRequestModel.Title" />
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="submit" class="btn btn-primary btn-block btn-custom-padding" @onclick="Search">Search</button>
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="button" class="btn btn-secondary btn-block btn-custom-padding" @onclick="Reset">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h4 class="mb-4">Search Results:</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Status</th>
+                        <th>Date Added</th>
+                        <th></th> <!-- Add Borrow Resource button column -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Resources != null)
+                    {
+                        foreach (var result in Resources)
+                        {
+                            <tr>
+                                <td>@result.Type</td>
+                                <td>@result.ResourceCategory.Name</td>
+                                <td>@result.Title</td>
+                                <td>@result.Author</td>
+                                <td>@result.Status</td>
+                                <td>@result.DateAdded.ToString("yyyy-MM-dd")</td>
+                                @if (result.Type == "Book" && result.Status == "Avalable")
+                                {
+                                    <td><button class="btn btn-success" @onclick="() => BorrowResource(result)">Borrow Resource</button></td>
+                                }
+                            </tr>
+                        }
+                    }
+                    @if (Resources == null || !Resources.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">No results found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private SearchRequestModel SearchRequestModel { get; set; } = new SearchRequestModel();
+
+    private List<Resource> Resources { get; set; } = new List<Resource>();
+
+    private List<string> Categories { get; set; } = new List<string>();
+
+    private string token = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //var authStateProvider = (JwtAuthenticationStateProvider)AuthenticationStateProvider;
+        //authStateProvider.NotifyStateChanged();
+        //
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //await InvokeAsync(StateHasChanged);
+
+        token = await _auth.GetToken();
+
+        await InvokeAsync(GetResources);
+        await InvokeAsync(GetCategories);
+    }
+
+    private async Task GetResources()
+    {
+        _resourceFetcher.SetBearerToken(token);
+
+        var response = await _resourceFetcher.Resources();
+
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+
+        Resources = result;
+    }
+
+    private async Task Search()
+    {
+        _resourceFetcher.SetBearerToken(token);
+
+        var jsonContent = new StringContent(JsonConvert.SerializeObject(SearchRequestModel), Encoding.UTF8, "application/json");
+
+        var response = await _resourceFetcher.SearchResources(jsonContent);
+
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+
+        Resources = result;
+    }
+
+    private async Task GetCategories()
+    {
+        _resourceFetcher.SetBearerToken(token);
+
+        var response = await _resourceFetcher.GetResourcesCategories();
+
+        var result = JsonConvert.DeserializeObject<List<string>>(response);
+
+        Categories = result;
+    }
+
+    private async Task Reset()
+    {
+        SearchRequestModel = new SearchRequestModel();
+
+        await InvokeAsync(GetResources);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task BorrowResource(Resource resource)
+    {
+        string uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
+
+        _userActionsFetcher.SetBearerToken(token);
+
+        await _userActionsFetcher.GetPhysicalResource(resource.Id, uId);
+
+        await InvokeAsync(GetResources);
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

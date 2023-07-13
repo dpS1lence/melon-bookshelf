@@ -1,0 +1,86 @@
+﻿@page "/register"
+@attribute [AllowAnonymous]
+@using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
+@using MelonBookshelfBlazorApp.Services;
+@using Microsoft.AspNetCore.Authorization;
+@using Newtonsoft.Json;
+@using System.Text;
+@inject NavigationManager _navigationManager
+@inject AuthenticationFetcher _auth
+@inject AuthenticationService _authenticationService
+
+<PageTitle>Register</PageTitle>
+
+<h3>Register</h3>
+<div class="registration-form">
+    <div class="form-group">
+        <h3>User Registration</h3>
+    </div>
+
+    <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" class="form-control" @bind="model.FirstName" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" class="form-control" @bind="model.LastName" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" class="form-control" @bind="model.Email" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" class="form-control" @bind="model.Password" />
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" class="form-control" @bind="model.ConfirmPassword" />
+    </div>
+
+    <div class="login-register-container">
+        <button type="button" class="btn btn-login" @onclick="GoToLoginPage">Login</button>
+        <button type="button" class="btn btn-register" @onclick="RegisterAction">Register</button>
+    </div>
+
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        string token = await _authenticationService.GetToken();
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            _navigationManager.NavigateTo("/");
+        }
+    }
+
+    RegisterModel model = new RegisterModel();
+
+    private async Task RegisterAction()
+    {
+        var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
+
+        var response = await _auth.Register(jsonContent);
+
+        if (response == "Bad request")
+        {
+            
+        }
+        else
+        {
+            GoToLoginPage();
+        }
+    }
+
+    private void GoToLoginPage()
+    {
+        _navigationManager.NavigateTo("/login");
+    }
+}

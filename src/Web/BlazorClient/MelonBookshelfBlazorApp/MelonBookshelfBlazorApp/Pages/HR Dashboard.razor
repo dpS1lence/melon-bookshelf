@@ -1,0 +1,313 @@
+﻿@page "/hr-dashboard"
+@using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Models.Enums;
+@using MelonBookshelfBlazorApp.Services;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using Newtonsoft.Json;
+@using System.Text;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager _navigationManager
+@inject AuthenticationService _authenticationService
+@inject HRActionsFetcher actionsFetcher
+@inject HRDashboardFetcher dashboardFetcher
+
+<h3>Resource Requests</h3>
+
+@if (ResourceRequests != null && ResourceRequests.Any())
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Category</th>
+				<th>Title</th>
+				<th>Author</th>
+				<th>Official Source Link</th>
+				<th>User</th>
+				<th>Justification</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var request in ResourceRequests)
+			{
+				if(request.DeliveryStatus == RequestDeliveryStatus.Delivered.ToString() || request.Status == RequestStatus.Declined.ToString())
+				{
+					continue;
+				}
+
+				<tr>
+					<td>@request.Category</td>
+					<td>@request.Title</td>
+					<td>@request.Author</td>
+					<td>@request.Link</td>
+					<td>@request.UserName</td>
+					<td>@request.Justification</td>
+					@if (request.DeliveryStatus != null)
+					{
+						if (request.DeliveryStatus == RequestDeliveryStatus.Processing.ToString())
+						{
+							<td>
+								<button class="btn btn-primary" @onclick="() => SetRequestInDelivery(request)">In Delivery</button>
+							</td>
+						}
+						else if (request.DeliveryStatus == RequestDeliveryStatus.InDelivery.ToString())
+						{
+							<td>
+								<button class="btn btn-primary" @onclick="() => SetRequestDelivered(request)">Delivered</button>
+							</td>
+						}
+						else if (request.Status == RequestStatus.PendingReview.ToString())
+						{
+							<td>
+								<button class="btn btn-primary" @onclick="() => ConfirmRequest(request)">Confirm</button>
+								<button class="btn btn-primary" @onclick="() => RejectRequest(request)">Reject</button>
+							</td>
+						}
+					}
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+else if (isLoading)
+{
+	<p>Loading...</p>
+}
+else
+{
+	<p>No resource requests found.</p>
+}
+
+<h3>Available Resources</h3>
+
+@if (AvailableResources != null && AvailableResources.Any())
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var resource in AvailableResources)
+			{
+				<tr>
+					<td>
+						<h5 class="resource-title">@resource.Resource.Title</h5>
+						<button class="btn btn-primary" @onclick="() => ShowResourceDetails(resource)">Details</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<div class="resource-details" style="display: @(resource.DetailsVisible ? "block" : "none")">
+							<p><strong>Category:</strong> @resource.Resource.ResourceCategory.Name</p>
+							<p><strong>Author:</strong> @resource.Resource.Author</p>
+							<p><strong>Status:</strong> @resource.Resource.Status</p>
+							<p><strong>InvoiceAttachment:</strong> @resource.Resource.InvoiceAttachment</p>
+							<p><strong>PurchasePrice:</strong> @resource.Resource.PurchasePrice</p>
+						</div>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+else if (isLoading)
+{
+	<p>Loading...</p>
+}
+else
+{
+	<p>No resource requests found.</p>
+}
+
+<div class="modal" style="display: @(showRejectionModal ? "block" : "none")">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Reject Request</h5>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label>Justification:</label>
+					<textarea class="form-control" @bind="@justification"></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideRejectionModal">Cancel</button>
+				<button type="button" class="btn btn-danger" @onclick="() => RejectRequest(selectedRequest)">Reject</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@*<div class="modal" style="display: @(showAddResourceModal ? "block" : "none")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Resource</h5>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Category" required />
+                </div>
+                <div class="form-group">
+                    <label>Title:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Title" required />
+                </div>
+                <div class="form-group">
+                    <label>Author:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Author" required />
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea class="form-control" @bind="@newResource.Description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Official Source Link:</label>
+                    <input type="text" class="form-control" @bind="@newResource.OfficialSourceLink" required />
+                </div>
+                <div class="form-group">
+                    <label>Price:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Price" required />
+                </div>
+                <div class="form-group">
+                    <label>Invoice:</label>
+                    <input type="text" class="form-control" @bind="@newResource.Invoice" required />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="HideAddInvoiceModal">Cancel</button>
+                <button type="button" class="btn btn-primary" @onclick="AddInvoice" disabled="@IsAddInvoiceButtonDisabled()">Add Resource</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+
+@*<div class="text-right">
+    <button class="btn btn-primary" @onclick="ShowAddInvoiceModal">Add New Resource</button>
+</div>*@
+
+@code {
+	private List<Request> ResourceRequests { get; set; }
+	private List<ResourceViewModel> AvailableResources { get; set; }
+	private Request selectedRequest;
+	private bool showRejectionModal = false;
+	private string justification = "";
+	private bool showAddResourceModal = false;
+	private ResourceViewModel newResource = new ResourceViewModel();
+	private bool isUserAdmin = false;
+	private bool isLoading = true;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		isUserAdmin = AuthenticationManager.IsUserAdmin(state.User.Claims);
+
+		var token = await _authenticationService.GetToken();
+
+		actionsFetcher.SetBearerToken(token);
+		dashboardFetcher.SetBearerToken(token);
+
+		if (!isUserAdmin)
+		{
+			_navigationManager.NavigateTo("/");
+		}
+
+		// Simulate fetching resource requests and available resources from a data source
+		isLoading = true;
+		ResourceRequests = await FetchResourceRequests();
+		AvailableResources = await FetchAvailableResources();
+		isLoading = false;
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task<List<Request>> FetchResourceRequests()
+	{
+		// Get the JSON response
+		var jsonResponse = await dashboardFetcher.GetRequests();
+
+		// Deserialize the JSON response to a List of Request
+		var requests = JsonConvert.DeserializeObject<List<Request>>(jsonResponse);
+
+		return requests;
+	}
+
+	private async Task<List<ResourceViewModel>> FetchAvailableResources()
+	{
+		// Get the JSON response
+		var jsonResponse = await dashboardFetcher.GetAllResourcesForHR();
+
+		// Deserialize the JSON response to a List of Resource
+		var resources = JsonConvert.DeserializeObject<List<Resource>>(jsonResponse);
+
+		var map = resources.Select(a => new ResourceViewModel { Resource = a, DetailsVisible = false }).ToList();
+
+		return map;
+	}
+
+	private async void ConfirmRequest(Request request)
+	{
+		var response = await actionsFetcher.ConfirmRequest(request.Id);
+
+		await InvokeAsync(UpadateState);
+	}
+
+	private async void SetRequestInDelivery(Request request)
+	{
+		var response = await actionsFetcher.SetRequestInDelivery(request.Id);
+
+		await InvokeAsync(UpadateState);
+	}
+
+	private async void SetRequestDelivered(Request request)
+	{
+		var response = await actionsFetcher.SetRequestDelivered(request.Id);
+
+		await InvokeAsync(UpadateState);
+	}
+
+	private async void RejectRequest(Request request)
+	{
+		// Serialize request to JSON
+		var jsonContent = JsonConvert.SerializeObject(justification);
+		var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+		// Send a request to reject
+		var response = await actionsFetcher.RejectRequest(request.Id, content);
+
+		HideRejectionModal();
+
+		await InvokeAsync(UpadateState);
+	}
+
+	private void ShowRejectionModal(Request request)
+	{
+		selectedRequest = request;
+		showRejectionModal = true;
+	}
+
+	private void HideRejectionModal()
+	{
+		showRejectionModal = false;
+		justification = "";
+	}
+
+	private void ShowResourceDetails(ResourceViewModel resource)
+	{
+		resource.DetailsVisible = !resource.DetailsVisible;
+	}
+
+	private async Task UpadateState()
+	{
+		ResourceRequests = await FetchResourceRequests();
+		AvailableResources = await FetchAvailableResources();
+
+		await InvokeAsync(StateHasChanged);
+	}
+}

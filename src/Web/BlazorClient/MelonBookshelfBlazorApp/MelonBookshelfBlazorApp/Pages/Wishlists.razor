@@ -1,0 +1,310 @@
+﻿@page "/requests"
+@attribute [Authorize]
+@using System.Collections.Generic
+@using MelonBookshelfBlazorApp.Models;
+@using MelonBookshelfBlazorApp.Models.Enums;
+@using MelonBookshelfBlazorApp.Services;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@using Newtonsoft.Json;
+@using System.Text;
+@inject NavigationManager _navigationManager
+@inject AuthenticationService _auth
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject HRDashboardFetcher _dashboardFetcher
+@inject RequestsFetcher _requestsFetcher
+@inject UserActionsFetcher _actionsFetcher
+@inject ResourcesFetcher _resourceFetcher
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+
+<h3>Your Requests</h3>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Status</th>
+			<th>Category</th>
+			<th>Author</th>
+			<th>Title</th>
+			<th>Priority</th>
+			<th>Upvotes</th>
+			<th>Likes</th> <!-- Add Likes column -->
+			<th></th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var request in UsersRequests)
+		{
+			<tr>
+				<td>@request.Status</td>
+				<td>@request.Category</td>
+				<td>@request.Author</td>
+				<td>@request.Title</td>
+				<td>@request.Priority</td>
+				@*					<td>
+			<button class="upvote-button @(request.UpvotersCollection ? "upvoted" : "")" @onclick="() => ToggleUpvote(request)">@((request.IsUpvoted ? "Upvote" : "Upvote"))</button>
+			</td>
+			<td>
+			<button class="like-button @(request.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(request)">
+			<i class="fas fa-thumbs-up"></i>
+			</button>
+			</td>*@
+			</tr>
+		}
+	</tbody>
+</table>
+
+<h3>All Requests</h3>
+
+@if (AllRequests != null && AllRequests.Any())
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Status</th>
+				<th>Category</th>
+				<th>Author</th>
+				<th>Title</th>
+				<th>Priority</th>
+				<th>Upvotes</th>
+				<th>Likes</th> <!-- Add Likes column -->
+				<th></th>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var request in AllRequests.Where(a => a.DeliveryStatus != RequestDeliveryStatus.Delivered.ToString() && a.Status != RequestStatus.Declined.ToString()))
+			{
+				<tr>
+					<td>@request.Status</td>
+					<td>@request.Category</td>
+					<td>@request.Author</td>
+					<td>@request.Title</td>
+					<td>@request.Priority</td>
+					<td>@request.UpvotersCount</td>
+					<td>@request.FollowersCount</td>
+					<td>
+						<button class="upvote-button" @onclick="() => ToggleUpvote(request.Id)">Upvote</button>
+					</td>
+					<td>
+						<button class="like-button" @onclick="() => ToggleLike(request.Id)">
+							<i class="fas fa-thumbs-up"></i>
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<button class="add-request-button" @onclick="ShowAddRequestModal">Add New Request</button>
+
+	@if (showAddRequestModal)
+	{
+		<div class="add-request-modal-overlay">
+			<div class="add-request-modal">
+				<h4>Add New Request</h4>
+				<EditForm Model="@newRequest" OnValidSubmit="AddRequest">
+					<DataAnnotationsValidator />
+
+					<div class="form-group">
+						<label>Category</label>
+						<InputSelect class="form-control" @bind-Value="@newRequest.Category" required>
+							@foreach (var category in Categories)
+							{
+								<option value="@category">@category</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => newRequest.Category)" />
+					</div>
+
+					<div class="form-group">
+						<label>Type</label>
+						<InputSelect class="form-control" @bind-Value="@newRequest.Type" required>
+							<option value="Video">Video</option>
+							<option value="Audio">Audio</option>
+							<option value="Book">Book</option>
+							<option value="Cource">Cource</option>
+						</InputSelect>
+						<ValidationMessage For="@(() => newRequest.Type)" />
+					</div>
+
+					<div class="form-group">
+						<label>Priority</label>
+						<InputSelect class="form-control" @bind-Value="@newRequest.Priority" required>
+							<option value="Low">Low</option>
+								<option value="Mid">Mid</option>
+								<option value="High">High</option>
+						</InputSelect>
+						<ValidationMessage For="@(() => newRequest.Priority)" />
+					</div>
+
+					<div class="form-group">
+						<label>Title</label>
+						<InputText class="form-control" @bind-Value="@newRequest.Title" required />
+						<ValidationMessage For="@(() => newRequest.Title)" />
+					</div>
+
+					<div class="form-group">
+						<label>Author</label>
+						<InputText class="form-control" @bind-Value="@newRequest.Author" required />
+						<ValidationMessage For="@(() => newRequest.Author)" />
+					</div>
+
+					<div class="form-group">
+						<label>Description</label>
+						<InputTextArea class="form-control" @bind-Value="@newRequest.Description" required />
+						<ValidationMessage For="@(() => newRequest.Description)" />
+					</div>
+
+					<div class="form-group">
+						<label>Official Source Link</label>
+						<InputText class="form-control" @bind-Value="@newRequest.Link" required />
+						<ValidationMessage For="@(() => newRequest.Link)" />
+					</div>
+
+					<div class="form-group">
+						<label>Justification</label>
+						<InputTextArea class="form-control" @bind-Value="@newRequest.Justification" required />
+						<ValidationMessage For="@(() => newRequest.Justification)" />
+					</div>
+
+					<div class="edit-menu-buttons">
+						<button type="submit" class="btn btn-primary">Add</button>
+						<button class="cancel-button" @onclick="HideAddRequestModal">Cancel</button>
+					</div>
+				</EditForm>
+			</div>
+		</div>
+	}
+}
+else
+{
+	<p>No requests found.</p>
+}
+
+@code {
+	private List<RequestWithFollows> AllRequests { get; set; } = new();
+	private List<Request> UsersRequests { get; set; } = new();
+	private List<string> Categories { get; set; } = new();
+	private bool showAddRequestModal = false;
+	private Request newRequest = new Request();
+	string uId = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		string token = await _auth.GetToken();
+
+		uId = await AuthenticationManager.GetUserId(_authenticationStateProvider);
+
+		_requestsFetcher.SetBearerToken(token);
+		_dashboardFetcher.SetBearerToken(token);
+		_actionsFetcher.SetBearerToken(token);
+
+		AllRequests = await FetchResourceRequests();
+		UsersRequests = await FetchResourceRequestsByUser();
+
+		await InvokeAsync(GetCategories);
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task GetCategories()
+	{
+		string token = await _auth.GetToken();
+
+		_resourceFetcher.SetBearerToken(token);
+
+		var response = await _resourceFetcher.GetResourcesCategories();
+
+		var result = JsonConvert.DeserializeObject<List<string>>(response);
+
+		Categories = result;
+	}
+
+	private async Task<List<RequestWithFollows>> FetchResourceRequests()
+	{
+		// Get the JSON response
+		var jsonResponse = await _requestsFetcher.GetAll();
+
+		// Deserialize the JSON response to a List of Request
+		var requests = JsonConvert.DeserializeObject<List<RequestWithFollows>>(jsonResponse);
+
+		return requests;
+	}
+
+	private async Task<List<Request>> FetchResourceRequestsByUser()
+	{
+
+		var userId = await AuthenticationManager.GetUserId(_authenticationStateProvider);
+		// Get the JSON response
+		var jsonResponse = await _requestsFetcher.GetRequestsByUserId(userId);
+
+		// Deserialize the JSON response to a List of Request
+		var requests = JsonConvert.DeserializeObject<List<Request>>(jsonResponse);
+
+		return requests;
+	}
+
+	private async Task ToggleUpvote(int requestid)
+	{
+		await _actionsFetcher.UpvoteRequest(requestid, uId);
+
+		AllRequests = await FetchResourceRequests();
+		UsersRequests = await FetchResourceRequestsByUser();
+
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task ToggleLike(int requestid)
+	{
+		await _actionsFetcher.FollowRequest(requestid, uId);
+
+		AllRequests = await FetchResourceRequests();
+		UsersRequests = await FetchResourceRequestsByUser();
+
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private void ShowAddRequestModal()
+	{
+		showAddRequestModal = true;
+	}
+
+	private void HideAddRequestModal()
+	{
+		showAddRequestModal = false;
+	}
+
+	private async Task AddRequest()
+	{
+		newRequest.UserId = uId;
+
+		newRequest.UserName = await AuthenticationManager.GetUserName(_authenticationStateProvider);
+		var token = await _auth.GetToken();
+		_requestsFetcher.SetBearerToken(token);
+
+		var jsonContent = JsonConvert.SerializeObject(newRequest);
+
+		var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+		try
+		{
+			await _requestsFetcher.AddRequest(content);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+
+		HideAddRequestModal();
+
+		AllRequests = await FetchResourceRequests();
+		UsersRequests = await FetchResourceRequestsByUser();
+		
+		await InvokeAsync(StateHasChanged);
+	}
+}

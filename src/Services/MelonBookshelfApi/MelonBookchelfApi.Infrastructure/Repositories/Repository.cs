@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MelonBookchelfApi.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace MelonBookchelfApi.Infrastructure.Repositories
         /// Entity framework DB context holding connection information and properties
         /// and tracking entity states 
         /// </summary>
-        protected DbContext Context { get; set; }
+        protected BookshelfDbContext Context { get; set; }
 
         /// <summary>
         /// Representation of table in database
@@ -25,7 +26,7 @@ namespace MelonBookchelfApi.Infrastructure.Repositories
             return this.Context.Set<T>();
         }
 
-        public Repository(DbContext context)
+        public Repository(BookshelfDbContext context)
         {
             Context = context;
         }
@@ -57,7 +58,19 @@ namespace MelonBookchelfApi.Infrastructure.Repositories
             return DbSet<T>().AsQueryable();
         }
 
-        public IQueryable<T> All<T>(Expression<Func<T, bool>> search) where T : class
+		public async Task DeleteAsync<T>(params object[] keyValues) where T : class
+		{
+			var entity = await Context.Set<T>().FindAsync(keyValues);
+			if (entity == null)
+			{
+				throw new ArgumentNullException("entity");
+			}
+			Context.Set<T>().Remove(entity);
+			await Context.SaveChangesAsync();
+		}
+
+
+		public IQueryable<T> All<T>(Expression<Func<T, bool>> search) where T : class
         {
             return this.DbSet<T>().Where(search);
         }
