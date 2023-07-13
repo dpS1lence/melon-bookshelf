@@ -66,6 +66,7 @@
                         <th>Author</th>
                         <th>Status</th>
                         <th>Date Added</th>
+                        <th></th> <!-- Add Borrow Resource button column -->
                     </tr>
                 </thead>
                 <tbody>
@@ -80,13 +81,14 @@
                                 <td>@result.Author</td>
                                 <td>@result.Status</td>
                                 <td>@result.DateAdded.ToString("yyyy-MM-dd")</td>
+                                <td><button class="btn btn-success" @onclick="() => BorrowResource(result)">Borrow Resource</button></td>
                             </tr>
                         }
                     }
                     @if (Resources == null || !Resources.Any())
                     {
                         <tr>
-                            <td colspan="6" class="text-center">No results found.</td>
+                            <td colspan="7" class="text-center">No results found.</td>
                         </tr>
                     }
                 </tbody>
@@ -161,5 +163,12 @@
         await InvokeAsync(GetResources);
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task BorrowResource(Resource resource)
+    {
+        // Implement borrowing resource logic here
+        // You can navigate to a borrow resource page or perform any other actions required for borrowing
+        // You can pass the resource data to the next page/component if needed
     }
 }

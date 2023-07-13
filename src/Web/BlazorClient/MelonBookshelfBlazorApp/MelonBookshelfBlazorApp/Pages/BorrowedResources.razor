@@ -16,58 +16,83 @@
 
 @if (resources != null && resources.Any())
 {
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Type</th>
-				<th>Category</th>
-				<th>Author</th>
-				<th>Title</th>
-				<th>Borrow Date</th>
-				<th>Expected Return Date</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var resource in resources)
-			{
-				<tr>
-					<td>@resource.Type</td>
-					<td>@resource.ResourceCategory</td>
-					<td>@resource.Author</td>
-					<td>@resource.Title</td>
-					<td>@resource.DateAdded</td>
-					@* <td>
-			<button class="return-button" @onclick="() => ReturnResource(resource)">Return</button>
-			</td>*@
-				</tr>
-			}
-		</tbody>
-	</table>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Title</th>
+                <th>Borrow Date</th>
+                <th>Expected Return Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var resource in resources)
+            {
+                <tr>
+                    <td>@resource.Type</td>
+                    <td>@resource.ResourceCategory</td>
+                    <td>@resource.Author</td>
+                    <td>@resource.Title</td>
+                    <td>@resource.DateAdded</td>
+                    <td>
+                        <button class="return-button" @onclick="() => ReturnResource(resource)">Return</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 else
 {
-	<p>No borrowed resources found.</p>
+    <p>No borrowed resources found.</p>
 }
 
 @code {
-	private IEnumerable<Resource>? resources;
+    private IEnumerable<Resource>? resources;
 
-	protected override async Task OnInitializedAsync()
-	{
-		string token = await _auth.GetToken();
+    protected override async Task OnInitializedAsync()
+    {
+        string token = await _auth.GetToken();
 
-		_resourceFetcher.SetBearerToken(token);
+        _resourceFetcher.SetBearerToken(token);
 
-		var uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
+        var uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
 
-		Console.WriteLine(uId);
+        Console.WriteLine(uId);
 
-		var response = await _resourceFetcher.PhysicalResourcesByUserId(uId);
+        var response = await _resourceFetcher.PhysicalResourcesByUserId(uId);
 
-		var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
 
-		resources = result;
+        resources = result;
+    }
 
-	}
+    private async Task ReturnResource(Resource resource)
+    {
+        //// Perform the necessary actions to return the resource
+        //Console.WriteLine("Returning resource: " + resource.Title);
+
+        //// Update the resource status or perform other actions as needed
+        //resource.Status = ResourceStatus.Available;
+
+        //// Send a request to the server to update the resource status
+        //await _resourceFetcher.UpdateResource(resource);
+
+        //// Refresh the list of borrowed resources
+        //await LoadBorrowedResources();
+    }
+
+    private async Task LoadBorrowedResources()
+    {
+        var uId = await AuthenticationManager.GetUserId(AuthenticationStateProvider);
+
+        var response = await _resourceFetcher.PhysicalResourcesByUserId(uId);
+
+        var result = JsonConvert.DeserializeObject<List<Resource>>(response);
+
+        resources = result;
+    }
 }
