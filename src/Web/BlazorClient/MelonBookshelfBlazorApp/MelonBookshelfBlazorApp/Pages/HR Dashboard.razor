@@ -44,7 +44,7 @@
 					<td>@request.Link</td>
 					<td>@request.UserName</td>
 					<td>@request.Justification</td>
-					@if (!string.IsNullOrWhiteSpace(request.DeliveryStatus) || !string.IsNullOrEmpty(request.DeliveryStatus))
+					@if (request.DeliveryStatus != null)
 					{
 						if (request.DeliveryStatus == RequestDeliveryStatus.Processing.ToString())
 						{

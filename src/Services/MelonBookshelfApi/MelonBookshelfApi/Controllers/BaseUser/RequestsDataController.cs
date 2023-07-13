@@ -9,7 +9,7 @@ namespace MelonBookshelfApi.Controllers.BaseUser
 {
     [ApiController]
     [Route("api")]
-    [Authorize]
+    [AllowAnonymous]
     public class RequestsController : Controller
     {
         private readonly IRequestService _requestService;

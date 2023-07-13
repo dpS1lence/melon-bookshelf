@@ -1,17 +1,26 @@
 ﻿@page "/requests"
 @attribute [Authorize]
 @using System.Collections.Generic
+@using MelonBookshelfBlazorApp.Models;
 @using MelonBookshelfBlazorApp.Services;
+@using MelonBookshelfBlazorApp.Services.Fetchers;
 @using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.Authorization;
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
+@using Newtonsoft.Json;
+@using System.Text;
 @inject NavigationManager _navigationManager
 @inject AuthenticationService _auth
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject HRDashboardFetcher _dashboardFetcher
+@inject RequestsFetcher _requestsFetcher
+@inject UserActionsFetcher _actionsFetcher
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
 
 <h3>Requests</h3>
 
-@if (Requests != null && Requests.Any())
+@*@if (AllRequests != null && AllRequests.Any())
 {
     <table class="table">
         <thead>
@@ -30,7 +39,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var request in Requests)
+            @foreach (var request in AllRequests)
             {
                 <tr>
                     <td>@request.Status</td>
@@ -38,279 +47,187 @@
                     <td>@request.Author</td>
                     <td>@request.Title</td>
                     <td>@request.Priority</td>
-                    <td>@request.DateAdded.ToShortDateString()</td>
-                    <td>@request.Upvotes</td>
-                    <td>@request.Likes</td> <!-- Display number of likes -->
+                    <td>@request.ConfirmationDate.ToShortDateString()</td>
+@*                    <td>@request.a</td>
+                    <td>@request.Likes</td>
                     <td>
                         <button class="upvote-button @(request.IsUpvoted ? "upvoted" : "")" @onclick="() => ToggleUpvote(request)">@((request.IsUpvoted ? "Upvote" : "Upvote"))</button>
                     </td>
                     <td>
                         <button class="like-button @(request.IsLiked ? "liked" : "")" @onclick="() => ToggleLike(request)">
-                            <i class="fas fa-thumbs-up"></i> 
+                            <i class="fas fa-thumbs-up"></i>
                         </button>
-
-
-                    </td>
-                    <td>
-                        <button class="delete-button" @onclick="() => DeleteRequest(request)">Delete</button>
-                    </td>
-                    <td>
-                        <button class="edit-button" @onclick="() => ToggleEditMenu(request)">Edit</button>
-                        @if (showEditMenu && selectedRequest == request)
-                        {
-                            <div class="edit-menu-overlay">
-                                <div class="edit-menu">
-                                    <h4>Edit Request</h4>
-                                    <EditForm Model="@editedRequest" OnValidSubmit="SaveChanges">
-                                        <DataAnnotationsValidator />
-                                        <div class="form-group">
-                                            <label>Status</label>
-                                            <InputText class="form-control" @bind-Value="@editedRequest.Status" required />
-                                            <ValidationMessage For="@(() => editedRequest.Status)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Category</label>
-                                            <InputText class="form-control" @bind-Value="@editedRequest.Category" required />
-                                            <ValidationMessage For="@(() => editedRequest.Category)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Author</label>
-                                            <InputText class="form-control" @bind-Value="@editedRequest.Author" required />
-                                            <ValidationMessage For="@(() => editedRequest.Author)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Title</label>
-                                            <InputText class="form-control" @bind-Value="@editedRequest.Title" required />
-                                            <ValidationMessage For="@(() => editedRequest.Title)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Priority</label>
-                                            <InputNumber class="form-control" @bind-Value="@editedRequest.Priority" required />
-                                            <ValidationMessage For="@(() => editedRequest.Priority)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Date Added</label>
-                                            <InputDate class="form-control" @bind-Value="@editedRequest.DateAdded" required />
-                                            <ValidationMessage For="@(() => editedRequest.DateAdded)" />
-                                        </div>
-                                        <div class="edit-menu-buttons">
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                                            <button class="cancel-button" @onclick="(e) => ToggleEditMenu(request)">Cancel</button>
-                                        </div>
-                                    </EditForm>
-                                </div>
-                            </div>
-                        }
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+*@
+<button class="add-request-button" @onclick="ShowAddRequestModal">Add New Request</button>
 
-    <button class="add-request-button" @onclick="ShowAddRequestModal">Add New Request</button>
+@if (showAddRequestModal)
+{
+	<div class="add-request-modal-overlay">
+		<div class="add-request-modal">
+			<h4>Add New Request</h4>
+			<EditForm Model="@newRequest" OnValidSubmit="AddRequest">
+				<DataAnnotationsValidator />
+				<div class="form-group">
+					<label>Category</label>
+					<InputText class="form-control" @bind-Value="@newRequest.Category" required />
+					<ValidationMessage For="@(() => newRequest.Category)" />
+				</div>
+				<div class="form-group">
+					<label>Type</label>
+					<InputText class="form-control" @bind-Value="@newRequest.Type" required />
+					<ValidationMessage For="@(() => newRequest.Type)" />
+				</div>
+				<div class="form-group">
+					<label>Title</label>
+					<InputText class="form-control" @bind-Value="@newRequest.Title" required />
+					<ValidationMessage For="@(() => newRequest.Title)" />
+				</div>
+				<div class="form-group">
+					<label>Author</label>
+					<InputText class="form-control" @bind-Value="@newRequest.Author" required />
+					<ValidationMessage For="@(() => newRequest.Author)" />
+				</div>
+				<div class="form-group">
+					<label>Description</label>
+					<InputTextArea class="form-control" @bind-Value="@newRequest.Description" required />
+					<ValidationMessage For="@(() => newRequest.Description)" />
+				</div>
+				<div class="form-group">
+					<label>Official Source Link</label>
+					<InputText class="form-control" @bind-Value="@newRequest.Link" required />
+					<ValidationMessage For="@(() => newRequest.Link)" />
+				</div>
+				<div class="form-group">
+					<label>Priority</label>
+					<InputText class="form-control" @bind-Value="@newRequest.Priority" required />
+					<ValidationMessage For="@(() => newRequest.Priority)" />
+				</div>
+				<div class="form-group">
+					<label>Justification</label>
+					<InputTextArea class="form-control" @bind-Value="@newRequest.Justification" required />
+					<ValidationMessage For="@(() => newRequest.Justification)" />
+				</div>
+				<div class="edit-menu-buttons">
+					<button type="submit" class="btn btn-primary">Add</button>
+					<button class="cancel-button" @onclick="HideAddRequestModal">Cancel</button>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+}
 
-    @if (showAddRequestModal)
-    {
-        @if (showAddRequestModal)
-        {
-            <div class="add-request-modal-overlay">
-                <div class="add-request-modal">
-                    <h4>Add New Request</h4>
-                    <EditForm Model="@newRequest" OnValidSubmit="SaveNewRequest">
-                        <DataAnnotationsValidator />
-                        <div class="form-group">
-                            <label>Category</label>
-                            <InputText class="form-control" @bind-Value="@newRequest.Category" required />
-                            <ValidationMessage For="@(() => newRequest.Category)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Type</label>
-                            <InputText class="form-control" @bind-Value="@newRequest.Type" required />
-                            <ValidationMessage For="@(() => newRequest.Type)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Title</label>
-                            <InputText class="form-control" @bind-Value="@newRequest.Title" required />
-                            <ValidationMessage For="@(() => newRequest.Title)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Author</label>
-                            <InputText class="form-control" @bind-Value="@newRequest.Author" required />
-                            <ValidationMessage For="@(() => newRequest.Author)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Description</label>
-                            <InputTextArea class="form-control" @bind-Value="@newRequest.Description" required />
-                            <ValidationMessage For="@(() => newRequest.Description)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Official Source Link</label>
-                            <InputText class="form-control" @bind-Value="@newRequest.OfficialSourceLink" required />
-                            <ValidationMessage For="@(() => newRequest.OfficialSourceLink)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Priority</label>
-                            <InputNumber class="form-control" @bind-Value="@newRequest.Priority" required />
-                            <ValidationMessage For="@(() => newRequest.Priority)" />
-                        </div>
-                        <div class="form-group">
-                            <label>Justification</label>
-                            <InputTextArea class="form-control" @bind-Value="@newRequest.Justification" required />
-                            <ValidationMessage For="@(() => newRequest.Justification)" />
-                        </div>
-                        <div class="edit-menu-buttons">
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button class="cancel-button" @onclick="HideAddRequestModal">Cancel</button>
-                        </div>
-                    </EditForm>
-                </div>
-            </div>
-        }
-
-    }
+@*
 }
 else
 {
     <p>No requests found.</p>
 }
-
+*@
 @code {
-    private List<Request> Requests { get; set; }
-    private bool showEditMenu = false;
-    private Request selectedRequest;
-    private Request editedRequest;
-    private bool showAddRequestModal = false;
-    private Request newRequest = new Request();
+	private List<Request> AllRequests { get; set; } = new();
+	private List<Request> UsersRequests { get; set; } = new();
+	private bool showAddRequestModal = false;
+	private Request newRequest = new Request();
+	string uId = string.Empty;
 
-    protected override void OnInitialized()
-    {
-        // Simulate fetching request resources
-        Requests = new List<Request>
-        {
-            new Request
-            {
-                Status = "In Progress",
-                Category = "Category 1",
-                Author = "Author 1",
-                Title = "Title 1",
-                Priority = 1,
-                DateAdded = DateTime.Now.AddDays(-7),
-                Upvotes = 10,
-                Likes = 5
-            },
-            new Request
-            {
-                Status = "Not Started",
-                Category = "Category 2",
-                Author = "Author 2",
-                Title = "Title 2",
-                Priority = 2,
-                DateAdded = DateTime.Now.AddDays(-14),
-                Upvotes = 5,
-                Likes = 2
-            },
-            // Add more request resources as needed
-        };
-    }
+	protected override async void OnInitialized()
+	{
+		string token = await _auth.GetToken();
 
-    private void ToggleUpvote(Request request)
-    {
-        if (request.IsUpvoted)
-        {
-            request.Upvotes--;
-            request.IsUpvoted = false;
-        }
-        else
-        {
-            request.Upvotes++;
-            request.IsUpvoted = true;
-        }
-    }
+		_requestsFetcher.SetBearerToken(token);
+		_dashboardFetcher.SetBearerToken(token);
+		_actionsFetcher.SetBearerToken(token);
 
-    private void ToggleLike(Request request)
-    {
-        if (!request.IsLiked)
-        {
-            request.Likes++;
-            request.IsLiked = true;
-        }
-        else
-        {
-            request.Likes--;
-            request.IsLiked = false;
-        }
-    }
+		uId = await AuthenticationManager.GetUserId(_authenticationStateProvider);
+		//
+		//AllRequests = await FetchResourceRequests();
+		//UsersRequests = await FetchResourceRequestsByUser(uId);
 
-    private void ToggleEditMenu(Request request)
-    {
-        showEditMenu = !showEditMenu;
-        selectedRequest = request;
+		// await InvokeAsync(StateHasChanged);
+	}
 
-        if (showEditMenu)
-        {
-            editedRequest = new Request
-                {
-                    Status = selectedRequest.Status,
-                    Category = selectedRequest.Category,
-                    Author = selectedRequest.Author,
-                    Title = selectedRequest.Title,
-                    Priority = selectedRequest.Priority,
-                    DateAdded = selectedRequest.DateAdded,
-                    Upvotes = selectedRequest.Upvotes,
-                    Likes = selectedRequest.Likes,
-                    IsUpvoted = selectedRequest.IsUpvoted
-                };
-        }
-        else
-        {
-            editedRequest = null;
-        }
-    }
+	private async Task<List<Request>> FetchResourceRequests()
+	{
+		// Get the JSON response
+		var jsonResponse = await _dashboardFetcher.GetRequests();
 
-    private void SaveChanges()
-    {
-        var index = Requests.FindIndex(r => r == selectedRequest);
-        Requests[index] = editedRequest;
-        ToggleEditMenu(selectedRequest);
-    }
+		// Deserialize the JSON response to a List of Request
+		var requests = JsonConvert.DeserializeObject<List<Request>>(jsonResponse);
 
-    private void DeleteRequest(Request request)
-    {
-        Requests.Remove(request);
-    }
+		return requests;
+	}
 
-    private void ShowAddRequestModal()
-    {
-        showAddRequestModal = true;
-    }
+	private async Task<List<Request>> FetchResourceRequestsByUser(string userId)
+	{
+		// Get the JSON response
+		var jsonResponse = await _requestsFetcher.GetRequestsByUserId(userId);
 
-    private void HideAddRequestModal()
-    {
-        showAddRequestModal = false;
-    }
+		// Deserialize the JSON response to a List of Request
+		var requests = JsonConvert.DeserializeObject<List<Request>>(jsonResponse);
 
-    private void SaveNewRequest()
-    {
-        Requests.Add(newRequest);
-        newRequest = new Request(); // Reset newRequest object
-        HideAddRequestModal();
-    }
+		return requests;
+	}
 
-    private class Request
-    {
-        public string Status { get; set; }
-        public string Category { get; set; }
-        public string Type { get; set; }
-        public string Author { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string OfficialSourceLink { get; set; }
-        public int Priority { get; set; }
-        public string Justification { get; set; }
-        public DateTime DateAdded { get; set; }
-        public int Upvotes { get; set; }
-        public int Likes { get; set; }
-        public bool IsUpvoted { get; set; }
-        public bool IsLiked { get; set; }
-    }
+	private async Task ToggleUpvote(Request request)
+	{
+		await _actionsFetcher.UpvoteRequest(request.Id, uId);
+
+		AllRequests = await FetchResourceRequests();
+		UsersRequests = await FetchResourceRequestsByUser(uId);
+
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task ToggleLike(Request request)
+	{
+		await _actionsFetcher.FollowRequest(request.Id, uId);
+
+		AllRequests = await FetchResourceRequests();
+		UsersRequests = await FetchResourceRequestsByUser(uId);
+
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private void ShowAddRequestModal()
+	{
+		showAddRequestModal = true;
+	}
+
+	private void HideAddRequestModal()
+	{
+		showAddRequestModal = false;
+	}
+
+	private async Task AddRequest()
+	{
+		newRequest.UserId = uId;
+
+		newRequest.UserName = await AuthenticationManager.GetUserName(_authenticationStateProvider);
+		var token = await _auth.GetToken();
+		_requestsFetcher.SetBearerToken(token);
+
+		var jsonContent = JsonConvert.SerializeObject(newRequest);
+
+		var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+		try
+		{
+			await _requestsFetcher.AddRequest(content);
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+
+		HideAddRequestModal();
+
+		//AllRequests = await FetchResourceRequests();
+		//UsersRequests = await FetchResourceRequestsByUser(uId);
+		//
+		//await InvokeAsync(StateHasChanged);
+	}
 }

@@ -31,6 +31,8 @@ namespace MelonBookshelfApi.Services
             _messageSender = messageSender;
         }
 
+
+
         public async Task<ResourceRequestDto> GetRequestById(int requestId)
         {
             var request = await _repository.GetByIdAsync<Request>(requestId);
@@ -44,7 +46,7 @@ namespace MelonBookshelfApi.Services
             return map;
         }
 
-        public async Task<IEnumerable<ResourceRequestDto>> GetRequests()
+        public async Task<IEnumerable<UserRequestedResourceModel>> GetRequests()
         {
             var request = await _repository.All<Request>().AsNoTracking().ToListAsync();
 
@@ -57,7 +59,9 @@ namespace MelonBookshelfApi.Services
                 map[i].UserName = user.UserName;
             }
 
-            return map;
+            var model = await ConvertToModel(map);
+
+            return model;
         }
 
         public async Task<IEnumerable<UserRequestedResourceModel>> GetRequestsByUserId(string userId)
@@ -71,6 +75,13 @@ namespace MelonBookshelfApi.Services
 
             var requests = _repository.All<Request>().AsNoTracking().Where(a => a.UserID == userId).ToList();
 
+            var model = await ConvertToModel(requests);
+
+            return model;
+        }
+
+        private async Task<IEnumerable<UserRequestedResourceModel>> ConvertToModel(IEnumerable<Request> requests)
+        {
             var model = new List<UserRequestedResourceModel>();
             foreach (var item in requests)
             {
@@ -98,7 +109,49 @@ namespace MelonBookshelfApi.Services
                     Priority = item.Priority,
                     Status = item.Status,
                     Title = item.Title,
+                    DeliveryStatus = item.DeliveryStatus,
                     FollowersCollection = followersCollection,
+                    FollowersCount = followersCollection.Count,
+                    UpvotersCollection = upvotersCollection,
+                    UpvotersCount = upvotersCollection.Count
+                });
+            }
+
+            return model;
+        }
+
+        private async Task<IEnumerable<UserRequestedResourceModel>> ConvertToModel(IEnumerable<ResourceRequestDto> requests)
+        {
+            var model = new List<UserRequestedResourceModel>();
+            foreach (var item in requests)
+            {
+                var followersCollection = _repository
+                    .All<RequestFollower>()
+                    .AsNoTracking()
+                    .Where(a => a.RequestId == item.Id)
+                    .Include(a => a.IdentityUser)
+                    .Select(a => new User { Id = a.IdentityUser.Id, Name = a.IdentityUser.UserName })
+                    .ToList();
+
+                var upvotersCollection = _repository
+                    .All<RequestFollower>()
+                    .AsNoTracking()
+                    .Where(a => a.RequestId == item.Id)
+                    .Include(a => a.IdentityUser)
+                    .Select(a => new User { Id = a.IdentityUser.Id, Name = a.IdentityUser.UserName })
+                    .ToList();
+
+                model.Add(new UserRequestedResourceModel
+                {
+                    Id = item.Id,
+                    Author = item.Author,
+                    UserName = item.UserName,
+                    Category = item.Category,
+                    Priority = item.Priority,
+                    Status = item.Status,
+                    Title = item.Title,
+					DeliveryStatus = item.DeliveryStatus,
+					FollowersCollection = followersCollection,
                     FollowersCount = followersCollection.Count,
                     UpvotersCollection = upvotersCollection,
                     UpvotersCount = upvotersCollection.Count
@@ -142,10 +195,9 @@ namespace MelonBookshelfApi.Services
 
             var resourceRequest = new Request
             {
-                Id = requestDto.Id,
                 Title = requestDto.Title,
                 Type = requestDto.Type,
-                DeliveryStatus = requestDto.DeliveryStatus,
+                DeliveryStatus = requestDto.DeliveryStatus ?? "",
                 Author = requestDto.Author,
                 Description = requestDto.Description,
                 Category = requestDto.Category,
@@ -153,7 +205,7 @@ namespace MelonBookshelfApi.Services
                 Justification = requestDto.Justification,
                 ConfirmationDate = DateTime.UtcNow,
                 UserID = userId,
-                Status = RequestStatus.Processing.ToString(),
+                Status = RequestStatus.PendingReview.ToString(),
                 Link = requestDto.Link
             };
 

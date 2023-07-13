@@ -83,7 +83,10 @@ app.UseAuthentication();
 app.UseRouting();
 app.UseCors("BlazorRequests");
 app.UseAuthorization();
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+	endpoints.MapControllers();
+});
 
 try
 {

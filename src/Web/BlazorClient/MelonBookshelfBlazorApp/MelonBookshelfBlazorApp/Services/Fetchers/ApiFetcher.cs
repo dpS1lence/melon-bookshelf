@@ -33,9 +33,19 @@ namespace MelonBookshelfBlazorApp.Services.Fetchers
 
         protected async Task<string> PostAsync(string endpoint, HttpContent content)
         {
-            var response = await httpClient.PostAsync(baseAddres + endpoint, content);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            try
+            {
+				var response = await httpClient.PostAsync(baseAddres + endpoint, content);
+                await Console.Out.WriteLineAsync(response.Content.ToString());
+				response.EnsureSuccessStatusCode();
+				return await response.Content.ReadAsStringAsync();
+			}
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+
+                throw ex;
+            }
         }
 
         protected async Task<string> PutAsync(string endpoint, HttpContent content)
